@@ -6,6 +6,57 @@ from lunar_python import Solar
 FORBIDDEN_DZ = {'午', '未'}
 MARRIAGE_KEYS = ['嫁娶', '结婚姻', '纳采', '订婚', '婚姻', '纳征', '订盟']
 
+# ═══ 17类传统禁忌 —— 在黄历之前先毙 ═══
+YANG_GONG = [
+    (1,13),(2,11),(3,9),(4,7),(5,5),(6,3),
+    (7,1),(7,29),(8,27),(9,25),(10,23),(11,21),(12,19)
+]
+
+def check_traditional_forbidden(L, d):
+    """17类传统禁忌 + 四绝/四离/破日 + 节气当天。命中即返回失败理由"""
+    lm = L.lunarMonth
+    ld = L.lunarDay
+    dz = L.day8Char[-1]
+    jc = getattr(L, 'today12DayOfficer', '')
+
+    if ld == 1:  return '朔日(初一)'
+    if ld == 15: return '望日(十五)'
+    if ld in (5, 14, 23): return f'月忌(初{ld})'
+    if (lm, ld) in YANG_GONG: return '杨公忌日'
+    if dz == '午': return '冲鼠(午日)'
+    if dz == '未': return '冲牛(未日)'
+    if jc == '破': return '破日'
+
+    # 四绝日/四离日/节气当天
+    jq = getattr(L, 'todaySolarTerms', '') or ''
+    if '立春' in jq: return '立春当天'
+    if '立夏' in jq: return '立夏当天'
+    if '立秋' in jq: return '立秋当天'
+    if '立冬' in jq: return '立冬当天'
+    if '春分' in jq: return '春分当天'
+    if '秋分' in jq: return '秋分当天'
+    if '夏至' in jq: return '夏至当天'
+    if '冬至' in jq: return '冬至当天'
+
+    # 四绝 = 立春/立夏/立秋/立冬前一日, 四离 = 二分二至前一日
+    s = Solar.fromYmd(d.year, d.month, d.day)
+    l = s.getLunar()
+    next_jq = l.getNextJieQi() if hasattr(l, 'getNextJieQi') else None
+    if next_jq:
+        nj_name = next_jq.getName() if hasattr(next_jq, 'getName') else str(next_jq)
+        nj_solar = next_jq.getSolar() if hasattr(next_jq, 'getSolar') else None
+        if nj_solar:
+            nj_d = datetime(nj_solar.getYear(), nj_solar.getMonth(), nj_solar.getDay())
+            if (nj_d - d).days <= 1:  # 次日就是节气
+                for term in ['立春','立夏','立秋','立冬']:
+                    if term in nj_name:
+                        return f'四绝日({term}前日)'
+                for term in ['春分','秋分','夏至','冬至']:
+                    if term in nj_name:
+                        return f'四离日({term}前日)'
+
+    return None
+
 # ═══ 国务院2026放假调休（关键数据） ═══
 HOLIDAYS = {
     # 中秋假期 9/25(五) - 9/27(日) 3天
@@ -37,7 +88,7 @@ def check_cnlunar(d):
     dz = L.day8Char[-1]
     good = [x.strip() for x in (L.goodThing or [])]
     bad = [x.strip() for x in (L.badThing or [])]
-    return {
+    return L, {
         'dz': dz, 'ganzhi': L.day8Char,
         'all_yi': good, 'all_ji': bad,
         'marriage_yi': [x for x in good if any(k in x for k in MARRIAGE_KEYS)],
@@ -59,7 +110,12 @@ def check_lp(d):
         'marriage_ji': [x for x in ji if any(k in x for k in MARRIAGE_KEYS)],
     }
 
-def judge(cn, lp):
+def judge(cn, lp, L, d):
+    # ── 第零关：传统禁忌 ──
+    taboo = check_traditional_forbidden(L, d)
+    if taboo:
+        return 0, f'🔴 传统禁忌: {taboo}', cn['dz'], taboo
+
     dz = cn['dz']
     if dz != lp['dz']: return 0, '日支双源不一致', dz, 'cn='+dz+' lp='+lp['dz']
     if dz in FORBIDDEN_DZ: return 0, f'冲{"鼠" if dz=="午" else "牛"}', dz, '生肖冲煞'
@@ -99,9 +155,9 @@ d = datetime(2026, 9, 1)
 while d <= datetime(2026, 12, 31):
     label, is_rest = day_type(d)
     if is_rest:  # 只扫实际休息日
-        cn = check_cnlunar(d)
+        L_obj, cn = check_cnlunar(d)
         lp = check_lp(d)
-        verdict, reason, dz, detail = judge(cn, lp)
+        verdict, reason, dz, detail = judge(cn, lp, L_obj, d)
         results.append((d, label, verdict, reason, dz, cn, lp, detail))
     d += timedelta(days=1)
 
