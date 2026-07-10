@@ -18,12 +18,27 @@
 
 ```
 办公助手/
-├── scripts/        # 可执行脚本
-├── output/         # 输出文件（计划、文档、报告）
-├── temp/           # 临时文件
-├── memory/         # 跨会话记忆（项目自动管理）
+├── scripts/                    # 可执行脚本
+│   ├── wedding/                # 婚嫁择日脚本
+│   ├── fitness/                # 健身饮食助手
+│   ├── utils/                  # 通用工具 (md转html/pdf等)
+│   └── notepad_app/            # 记事本应用
+├── output/                     # 输出文件（按领域分目录）
+│   ├── wedding/                # 婚嫁报告 (八字合婚/订婚择日/综合规划)
+│   ├── fitness/                # 健身输出 (评估/计划/日志)
+│   └── README.md               # 输出规范说明
+├── data/                       # 静态数据资源
+│   ├── exercises/              # 锻炼动作库
+│   └── nutrition/              # 食物成分数据
+├── knowledge/                  # 知识库文档
+│   ├── fitness/                # 健身指南
+│   └── wedding/                # 婚嫁知识
+├── temp/                       # 临时文件（用完即删）
+├── memory/                     # 跨会话记忆
 └── README.md
 ```
+
+> 输出文件须遵循命名规范：`{主题}_{内容描述}_{版本/日期}.{扩展名}`，详见 `output/README.md`
 
 ## Git 版本
 
@@ -60,3 +75,63 @@
 ### 天气窗口（福建/江西）
 
 10-11月最佳(20-28°C)，3-5月次之(15-25°C)，7-8月太热，12-2月太冷
+
+## 健身 & 饮食助手
+
+### 能力范围
+
+作为健身饮食助手，能够提供：
+
+| 能力 | 说明 |
+|------|------|
+| 身体评估 | BMI/体脂率/BMR/TDEE/1RM/心率区间 计算 |
+| 营养分析 | 宏量营养素分配、中国食物成分查询、GI指数、一餐营养计算 |
+| 训练计划 | 5种分化方式 × 4种目标 × 3个水平的周期化训练计划 |
+| 动作指导 | 873个锻炼动作的搜索和筛选（按肌肉群/器械/难度） |
+| 饮食建议 | 减脂/增肌/维持的完整饮食方案 |
+
+### 工具模块 (`scripts/fitness/`)
+
+| 文件 | 功能 |
+|------|------|
+| `engine.py` | 核心计算引擎 (BMI/BMR/TDEE/体脂/1RM/心率/热量消耗) |
+| `food_db.py` | 中国食物成分数据库 (1677种食物 + GI指数) |
+| `exercise_db.py` | 锻炼动作数据库 (873个动作, 中英文搜索) |
+| `training.py` | 训练计划生成器 (周期化, 增肌/力量/减脂/耐力) |
+| `cli.py` | 命令行工具 (assess/bmi/1rm/plan/food/exercise/meal) |
+
+### 数据资源
+
+| 数据 | 位置 | 来源 |
+|------|------|------|
+| 锻炼动作库 | `data/exercises/all_exercises.json` | free-exercise-db (Public Domain) |
+| 中国食物成分 | `data/nutrition/all_foods.json` | 《中国食物成分表第6版》 |
+| GI指数 | `data/nutrition/gi_index.json` | 中国食物成分表 |
+| 知识库 | `knowledge/fitness/guide.md` | 运动科学综合 |
+
+### 使用示例
+
+```python
+from scripts.fitness import quick_report, print_quick_report
+
+# 快速评估
+report = quick_report(gender="男", age=30, height_cm=175, weight_kg=78,
+                      waist_cm=82, neck_cm=38, goal="cut")
+print_quick_report(report)
+```
+
+```bash
+# 命令行
+python scripts/fitness/cli.py assess    # 交互式评估
+python scripts/fitness/cli.py food 鸡胸  # 搜索食物
+python scripts/fitness/cli.py plan      # 生成训练计划
+```
+
+### 运动科学参考
+
+- ACSM 运动测试与处方指南
+- Mifflin-St Jeor BMR 公式 (1990)
+- U.S. Navy 体脂估算法
+- Karvonen 心率储备法
+- 周期化训练理论 (线性/波浪/板块)
+- 渐进超负荷原则
