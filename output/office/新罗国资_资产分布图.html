@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>新罗国资 · 资产分布（高德）</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+html,body,#c{width:100%;height:100%;margin:0;padding:0;font-family:"Microsoft YaHei",sans-serif;}
+.p{position:absolute;top:10px;left:10px;background:rgba(255,255,255,.95);padding:10px 14px;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.15);z-index:999;font-size:13px;max-height:85vh;overflow-y:auto;}
+.p h3{margin:0 0 4px;font-size:15px;}
+.r{display:flex;align-items:center;margin:2px 0;cursor:pointer;}
+.r:hover{background:#f5f5f5;border-radius:3px;}
+.d{width:12px;height:12px;border-radius:50%;margin-right:6px;flex-shrink:0;border:2px solid #fff;box-shadow:0 0 2px rgba(0,0,0,.3);}
+.c{color:#999;margin-left:auto;font-size:11px;}
+</style>
+<script src="https://webapi.amap.com/maps?v=2.0&key=a8459f2dbcf06e8ba5d0fbd7be7a4163"></script></head>
+<body><div id="c"></div><div class="p" id="l"></div>
+<script>
+var map=new AMap.Map('c',{zoom:13,center:[117.06147360869565,25.110890565217392],mapStyle:'amap://styles/whitesmoke'});
+var sectors=[{"name": "新罗国资-中山路", "admin": "陈晓芳", "center": [117.02968966666667, 25.093678666666666], "radius": 2702.8911412930024, "count": 6}, {"name": "新罗国资-北环解放", "admin": "陈晓芳", "center": [117.03084375, 25.102957], "radius": 1090.6883348785236, "count": 4}, {"name": "新罗国资-九一南莲新", "admin": "陈晓芳", "center": [117.0320588, 25.093641400000003], "radius": 1090.5765071237538, "count": 5}, {"name": "新罗国资-罗龙交易城", "admin": "陈晓芳", "center": [117.1787362, 25.178304], "radius": 30216.41591793239, "count": 5}, {"name": "新罗国资-曹溪", "admin": "陈晓芳", "center": [117.023681, 25.065088], "radius": 500, "count": 1}, {"name": "新罗国资-龙岩大道", "admin": "陈晓芳", "center": [117.017362, 25.075884], "radius": 500, "count": 1}, {"name": "新罗国资-美食广场", "admin": "谢德胜", "center": [117.017362, 25.075884], "radius": 500, "count": 1}];
+var pts=[{"name": "凯丰商厦（国资）", "admin": "陈晓芳", "addr": "龙岩市新罗区中城中山东路13-8号", "sector": "新罗国资-中山路", "lng": 117.031628, "lat": 25.094993}, {"name": "老百货食堂大楼", "admin": "陈晓芳", "addr": "龙岩市新罗区中城上井劳动巷32-1号", "sector": "新罗国资-中山路", "lng": 117.036816, "lat": 25.098942}, {"name": "老百货食堂宿舍", "admin": "陈晓芳", "addr": "龙岩市新罗区中城上井劳动巷32号宿舍101室", "sector": "新罗国资-中山路", "lng": 117.017362, "lat": 25.075884}, {"name": "中山路3期（糖酒）", "admin": "陈晓芳", "addr": "龙岩市新罗区中城中山西路2-20号", "sector": "新罗国资-中山路", "lng": 117.030769, "lat": 25.094234}, {"name": "银河商业城A幢（糖酒）", "admin": "陈晓芳", "addr": "龙岩市新罗区中城九一北路50-7号A幢一层店面", "sector": "新罗国资-中山路", "lng": 117.030766, "lat": 25.09904}, {"name": "银河商业城B幢（糖酒）", "admin": "陈晓芳", "addr": "龙岩市新罗区中城九一北路50-5号B幢一层1号店", "sector": "新罗国资-中山路", "lng": 117.030797, "lat": 25.098979}, {"name": "北环西路23号", "admin": "陈晓芳", "addr": "龙岩市新罗区中城北环西路2-17、2-18号", "sector": "新罗国资-北环解放", "lng": 117.028397, "lat": 25.103682}, {"name": "北环西路66号", "admin": "陈晓芳", "addr": "龙岩市新罗区中城北环西路67-3号1#店", "sector": "新罗国资-北环解放", "lng": 117.028457, "lat": 25.103279}, {"name": "北环西路67号", "admin": "陈晓芳", "addr": "龙岩市新罗区中城北环西路67-4号二层", "sector": "新罗国资-北环解放", "lng": 117.028701, "lat": 25.10335}, {"name": "挺秀花园2#楼", "admin": "陈晓芳", "addr": "龙岩市新罗区东城和平路71号挺秀花园2#楼2602室", "sector": "新罗国资-北环解放", "lng": 117.03782, "lat": 25.101517}, {"name": "九一南路3号", "admin": "陈晓芳", "addr": "龙岩市新罗区西城九一南路2号", "sector": "新罗国资-九一南莲新", "lng": 117.032057, "lat": 25.093572}, {"name": "九一南路3号二层", "admin": "陈晓芳", "addr": "龙岩市新罗区西城九一南路2号二层", "sector": "新罗国资-九一南莲新", "lng": 117.032057, "lat": 25.093572}, {"name": "九一南路3号地下室", "admin": "陈晓芳", "addr": "龙岩市新罗区西城九一南路6号", "sector": "新罗国资-九一南莲新", "lng": 117.032057, "lat": 25.093572}, {"name": "工业大厦", "admin": "陈晓芳", "addr": "龙岩市新罗区西城登高西路77号", "sector": "新罗国资-九一南莲新", "lng": 117.036816, "lat": 25.098942}, {"name": "西安南路26-17号（国资）", "admin": "陈晓芳", "addr": "龙岩市新罗区西城西安南路26-17号", "sector": "新罗国资-九一南莲新", "lng": 117.027307, "lat": 25.088549}, {"name": "原交通大楼", "admin": "陈晓芳", "addr": "龙岩市新罗区西城罗龙东路21号", "sector": "新罗国资-罗龙交易城", "lng": 117.419923, "lat": 25.298589}, {"name": "原交通大楼外墙", "admin": "陈晓芳", "addr": "龙岩市新罗区西城罗龙东路原交通大楼二层", "sector": "新罗国资-罗龙交易城", "lng": 117.419923, "lat": 25.298589}, {"name": "罗龙东路220号", "admin": "陈晓芳", "addr": "龙岩市新罗区西城罗龙东路220号", "sector": "新罗国资-罗龙交易城", "lng": 117.017716, "lat": 25.097819}, {"name": "罗龙东路222号", "admin": "陈晓芳", "addr": "龙岩市新罗区西城罗龙东路222号", "sector": "新罗国资-罗龙交易城", "lng": 117.017706, "lat": 25.097806}, {"name": "罗龙东路（糖酒）", "admin": "陈晓芳", "addr": "龙岩市新罗区西城罗龙东路二层204", "sector": "新罗国资-罗龙交易城", "lng": 117.018413, "lat": 25.098717}, {"name": "曹溪管理站", "admin": "陈晓芳", "addr": "龙岩市新罗区曹溪中路88-11号", "sector": "新罗国资-曹溪", "lng": 117.023681, "lat": 25.065088}, {"name": "沁芳轩", "admin": "陈晓芳", "addr": "龙岩市新罗区莲西路19号交发沁芳轩", "sector": "新罗国资-龙岩大道", "lng": 117.017362, "lat": 25.075884}, {"name": "登高东美食广场", "admin": "谢德胜", "addr": "龙岩市新罗区东城登高东路555-115", "sector": "新罗国资-美食广场", "lng": 117.017362, "lat": 25.075884}];
+var cols={'陈晓芳':'#EA4335','谢德胜':'#4285F4'};
+
+sectors.forEach(function(s){
+  var cl=cols[s.admin]||'#999';
+  var c=new AMap.Circle({center:s.center,radius:s.radius,fillOpacity:.12,fillColor:cl,strokeColor:cl,strokeWeight:2,strokeOpacity:.5,strokeStyle:'dashed',zIndex:10});
+  c.setMap(map);
+  new AMap.Text({text:s.name,position:[s.center[0]+.004,s.center[1]+.003],
+    style:{'font-size':'11px',color:cl,background:'rgba(255,255,255,.85)',padding:'2px 6px','border-radius':'3px',border:'1px solid '+cl}}).setMap(map);
+});
+
+pts.forEach(function(p){
+  var cl=cols[p.admin]||'#999';
+  var m=new AMap.CircleMarker({center:[p.lng,p.lat],radius:7,fillColor:cl,fillOpacity:.9,strokeColor:'#fff',strokeWeight:2,zIndex:100,cursor:'pointer'});
+  m.on('click',function(){
+    new AMap.InfoWindow({content:'<b>'+p.name+'</b><br><span style="color:#666;font-size:11px">'+p.sector+'<br>'+p.addr+'</span>',offset:new AMap.Pixel(0,-20)}).open(map,[p.lng,p.lat]);
+  });
+  m.setMap(map);
+});
+
+var h='<h3> 新罗国资 · 资产分布</h3><div style="color:#666;margin-bottom:6px;">共 <b>'+sectors.length+'</b> 片区 &nbsp;|&nbsp; <b>'+pts.length+'</b> 个资产点</div>';
+['陈晓芳','谢德胜'].forEach(function(a){
+  var ss=sectors.filter(function(s){return s.admin===a;});
+  if(!ss.length) return;
+  h+='<div style="margin-top:4px;font-weight:bold;color:'+(cols[a]||'#999')+';">'+a+'（'+ss.length+'片区）</div>';
+  ss.forEach(function(s){
+    h+='<div class="r" onclick="map.setCenter(['+s.center[0]+','+s.center[1]+']);map.setZoom(15);"><span class="d" style="background:'+(cols[a]||'#999')+';"></span>'+s.name+'<span class="c">'+s.count+'项</span></div>';
+  });
+});
+document.getElementById('l').innerHTML=h;
+map.addControl(new AMap.Scale());map.addControl(new AMap.ToolBar());
+</script></body></html>

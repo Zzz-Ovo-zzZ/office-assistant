@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>惠和资产 · 片区划分可视化</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  html,body,#container{width:100%;height:100%;margin:0;padding:0;font-family:"Microsoft YaHei",sans-serif;}
+  .info-panel{position:absolute;top:10px;left:10px;background:rgba(255,255,255,0.95);padding:12px 16px;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.15);z-index:999;max-height:80vh;overflow-y:auto;font-size:13px;}
+  .info-panel h3{margin:0 0 8px 0;font-size:16px;color:#333;}
+  .info-panel .legend-row{display:flex;align-items:center;margin:3px 0;cursor:pointer;}
+  .info-panel .legend-row:hover{background:#f5f5f5;border-radius:3px;}
+  .info-panel .dot{width:12px;height:12px;border-radius:50%;margin-right:8px;flex-shrink:0;border:2px solid #fff;box-shadow:0 0 3px rgba(0,0,0,0.3);}
+  .info-panel .count{color:#999;margin-left:auto;font-size:11px;}
+  .toggle-btn{position:absolute;top:10px;right:10px;z-index:999;background:white;border:1px solid #ddd;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:13px;}
+  .toggle-btn:hover{background:#f0f0f0;}
+</style>
+<script src="https://webapi.amap.com/maps?v=2.0&key=a8459f2dbcf06e8ba5d0fbd7be7a4163"></script>
+<script src="https://webapi.amap.com/ui/1.1/main.js"></script>
+</head>
+<body>
+<div id="container"></div>
+<div class="info-panel" id="legend"></div>
+<button class="toggle-btn" onclick="toggleBoundary()" style="top:10px;">隐藏片区边界</button>
+<button class="toggle-btn" onclick="toggleBoundary()" style="top:44px;">隐藏片区标签</button>
+
+<script>
+// 初始化地图（高德龙岩市中心）
+var map = new AMap.Map('container', {
+    zoom: 13,
+    center: [117.01590528915662, 25.111070421686744],
+    mapStyle: 'amap://styles/whitesmoke',
+    viewMode: '2D',
+});
+
+// 管理员色盘（每管理员色调一致，不同片区调深浅）
+var adminBase = {"陈晓芳": "#EA4335", "李美清": "#34A853", "谢德胜": "#4285F4", "暂无": "#9E9E9E"};
+
+// 调整片区颜色的深浅
+function shadeColor(color, percent) {
+    var num = parseInt(color.replace('#', ''), 16);
+    var amt = Math.round(2.55 * percent);
+    var R = Math.min(255, Math.max(0, (num >> 16) + amt));
+    var G = Math.min(255, Math.max(0, (num >> 8 & 0x00FF) + amt));
+    var B = Math.min(255, Math.max(0, (num & 0x0000FF) + amt));
+    return '#' + (0x1000000 + R*0x10000 + G*0x100 + B).toString(16).slice(1);
+}
+
+var sectors = [{"name": "丝钉厂-龙门", "admin": "李美清", "center": [116.972654, 25.095719], "radius": 500, "count": 1}, {"name": "新罗国资-中山路", "admin": "陈晓芳", "center": [117.02968966666667, 25.093678666666666], "radius": 2702.8911412930024, "count": 6}, {"name": "新罗国资-北环解放", "admin": "陈晓芳", "center": [117.03084375, 25.102957], "radius": 1090.6883348785236, "count": 4}, {"name": "新罗国资-罗龙交易城", "admin": "陈晓芳", "center": [117.1787362, 25.178304], "radius": 30216.41591793239, "count": 5}, {"name": "新罗国资-九一南莲新", "admin": "陈晓芳", "center": [117.0320588, 25.093641400000003], "radius": 1090.5765071237538, "count": 5}, {"name": "新罗国资-曹溪", "admin": "陈晓芳", "center": [117.023681, 25.065088], "radius": 500, "count": 1}, {"name": "新罗国资-龙岩大道", "admin": "陈晓芳", "center": [117.017362, 25.075884], "radius": 500, "count": 1}, {"name": "新罗国资-美食广场", "admin": "谢德胜", "center": [117.017362, 25.075884], "radius": 500, "count": 1}, {"name": "凯丰商厦（国资×五交化）", "admin": "陈晓芳", "center": [117.031628, 25.094993], "radius": 500, "count": 1}, {"name": "凯丰商厦（国资×五交化×饮食×果品）", "admin": "陈晓芳", "center": [117.031628, 25.094993], "radius": 500, "count": 1}, {"name": "第二被单厂-凤凰路", "admin": "李美清", "center": [117.028363, 25.109167], "radius": 500, "count": 1}, {"name": "陈缸酿酒-双泉路", "admin": "陈晓芳", "center": [117.032165, 25.088109], "radius": 500, "count": 1}, {"name": "惠华糖酒-中城", "admin": "陈晓芳", "center": [117.0323495, 25.098283000000002], "radius": 665.0607793798508, "count": 2}, {"name": "惠和五交化-中城", "admin": "陈晓芳", "center": [117.03364450000001, 25.096045], "radius": 500, "count": 2}, {"name": "惠和五交化-登高西路", "admin": "陈晓芳", "center": [117.023085, 25.089694], "radius": 500, "count": 1}, {"name": "惠和五交化-交易城", "admin": "陈晓芳", "center": [116.99826, 25.100487], "radius": 500, "count": 1}, {"name": "惠成资产-登高东", "admin": "陈晓芳", "center": [117.04009457142857, 25.098015285714286], "radius": 1237.4024495950325, "count": 7}, {"name": "惠成资产-龙川中路", "admin": "陈晓芳", "center": [117.034285, 25.095624], "radius": 500, "count": 1}, {"name": "惠成资产-莲新", "admin": "陈晓芳", "center": [117.028276, 25.080632500000004], "radius": 548.4930364226962, "count": 6}, {"name": "矿产工业-凤凰路", "admin": "李美清", "center": [117.028363, 25.109167], "radius": 500, "count": 1}, {"name": "矿产工业-东宝路", "admin": "暂无", "center": [117.054881, 25.107512], "radius": 500, "count": 1}, {"name": "粮油加工厂-凤凰路", "admin": "李美清", "center": [117.012698, 25.123103], "radius": 500, "count": 1}, {"name": "腾龙公路-登高东", "admin": "陈晓芳", "center": [117.017362, 25.075884], "radius": 500, "count": 1}, {"name": "面粉加工厂-中山路", "admin": "李美清", "center": [117.030935, 25.098477], "radius": 500, "count": 1}, {"name": "糖酒公司-工业中路", "admin": "陈晓芳", "center": [117.020879, 25.111054], "radius": 500, "count": 1}, {"name": "翔丰实业-塔泉西安", "admin": "李美清", "center": [117.03232650000001, 25.0954035], "radius": 934.5142206390649, "count": 2}, {"name": "龙津信用-塔泉西安", "admin": "李美清", "center": [117.027837, 25.091865], "radius": 500, "count": 1}, {"name": "惠华液压-曹溪", "admin": "李美清", "center": [117.02775, 25.060685], "radius": 500, "count": 1}, {"name": "惠和农机-北环", "admin": "陈晓芳", "center": [117.030218, 25.1079055], "radius": 1170.5548152986494, "count": 2}, {"name": "惠和化肥-北城", "admin": "李美清", "center": [116.9952235, 25.108811], "radius": 527.6308870260161, "count": 2}, {"name": "惠和化肥-西陂北", "admin": "李美清", "center": [117.036816, 25.098942], "radius": 500, "count": 1}, {"name": "惠和商管-中山路", "admin": "陈晓芳", "center": [117.033004, 25.096466], "radius": 500, "count": 1}, {"name": "惠和商管-龙川解放", "admin": "李美清", "center": [117.033451, 25.097879], "radius": 566.8755112426818, "count": 2}, {"name": "惠和燃料-登高西路", "admin": "李美清", "center": [117.023085, 25.089694], "radius": 500, "count": 1}, {"name": "惠和燃料-溪畔路", "admin": "李美清", "center": [117.038978, 25.096736], "radius": 500, "count": 1}, {"name": "惠和燃料-西陂北", "admin": "李美清", "center": [117.044201, 25.078525], "radius": 500, "count": 1}, {"name": "惠翔食品-中城", "admin": "李美清", "center": [117.03364450000001, 25.096045], "radius": 500, "count": 2}, {"name": "惠翔食品-北城", "admin": "李美清", "center": [116.9938595, 25.104278], "radius": 696.7792971929937, "count": 2}, {"name": "惠翔食品-南城登高", "admin": "李美清", "center": [117.040168, 25.08955], "radius": 954.3477114459896, "count": 2}, {"name": "惠翔食品-西安南路（李）", "admin": "李美清", "center": [117.02503, 25.088974], "radius": 500, "count": 1}, {"name": "惠翔食品-西安南路（陈）", "admin": "陈晓芳", "center": [117.02503, 25.088974], "radius": 500, "count": 1}, {"name": "惠翔食品-东肖", "admin": "李美清", "center": [117.013761, 25.04517], "radius": 500, "count": 2}, {"name": "惠翔食品-小池大池", "admin": "李美清", "center": [116.4424405, 25.1834015], "radius": 38998.31152738778, "count": 2}, {"name": "惠翔食品-龙门", "admin": "李美清", "center": [116.48214, 25.94497], "radius": 500, "count": 1}, {"name": "惠和纺织-凤凰路", "admin": "李美清", "center": [117.012698, 25.123103], "radius": 500, "count": 1}];
+var markersData = [{"name": "龙门镇（丝钉厂）", "admin": "李美清", "sector": "丝钉厂-龙门", "area": "新罗区·龙门镇", "lng": 116.972654, "lat": 25.095719, "addr": "福建省龙岩市新罗区龙门镇"}, {"name": "凯丰商厦（国资）", "admin": "陈晓芳", "sector": "新罗国资-中山路", "area": "新罗区·中城街道（中山路/中山东路/九一北路）", "lng": 117.031628, "lat": 25.094993, "addr": "福建省龙岩市新罗区凯丰商厦"}, {"name": "老百货食堂大楼", "admin": "陈晓芳", "sector": "新罗国资-中山路", "area": "新罗区·中城街道（中山路/中山东路/九一北路）", "lng": 117.036816, "lat": 25.098942, "addr": "福建省龙岩市新罗区"}, {"name": "老百货食堂宿舍", "admin": "陈晓芳", "sector": "新罗国资-中山路", "area": "新罗区·中城街道（中山路/中山东路/九一北路）", "lng": 117.017362, "lat": 25.075884, "addr": "福建省龙岩市"}, {"name": "中山路3期（糖酒）", "admin": "陈晓芳", "sector": "新罗国资-中山路", "area": "新罗区·中城街道（中山路/中山东路/九一北路）", "lng": 117.030769, "lat": 25.094234, "addr": "福建省龙岩市新罗区中山东路三期"}, {"name": "银河商业城A幢（糖酒）", "admin": "陈晓芳", "sector": "新罗国资-中山路", "area": "新罗区·中城街道（中山路/中山东路/九一北路）", "lng": 117.030766, "lat": 25.09904, "addr": "福建省龙岩市新罗区银河商业城"}, {"name": "银河商业城B幢（糖酒）", "admin": "陈晓芳", "sector": "新罗国资-中山路", "area": "新罗区·中城街道（中山路/中山东路/九一北路）", "lng": 117.030797, "lat": 25.098979, "addr": "福建省龙岩市新罗区银河商业城b号"}, {"name": "北环西路23号", "admin": "陈晓芳", "sector": "新罗国资-北环解放", "area": "新罗区·中城街道/东城街道（北环西路/解放路/和平路）", "lng": 117.028397, "lat": 25.103682, "addr": "福建省龙岩市新罗区北环西路23号"}, {"name": "北环西路66号", "admin": "陈晓芳", "sector": "新罗国资-北环解放", "area": "新罗区·中城街道/东城街道（北环西路/解放路/和平路）", "lng": 117.028457, "lat": 25.103279, "addr": "福建省龙岩市新罗区北环西路66号"}, {"name": "北环西路67号", "admin": "陈晓芳", "sector": "新罗国资-北环解放", "area": "新罗区·中城街道/东城街道（北环西路/解放路/和平路）", "lng": 117.028701, "lat": 25.10335, "addr": "福建省龙岩市新罗区北环西路67号"}, {"name": "罗龙东路220号", "admin": "陈晓芳", "sector": "新罗国资-罗龙交易城", "area": "新罗区·西城街道/北城街道（罗龙东路/交易城）", "lng": 117.017716, "lat": 25.097819, "addr": "福建省龙岩市新罗区罗龙东路220号"}, {"name": "罗龙东路222号", "admin": "陈晓芳", "sector": "新罗国资-罗龙交易城", "area": "新罗区·西城街道/北城街道（罗龙东路/交易城）", "lng": 117.017706, "lat": 25.097806, "addr": "福建省龙岩市新罗区罗龙东路222号"}, {"name": "罗龙东路（糖酒）", "admin": "陈晓芳", "sector": "新罗国资-罗龙交易城", "area": "新罗区·西城街道/北城街道（罗龙东路/交易城）", "lng": 117.018413, "lat": 25.098717, "addr": "福建省龙岩市新罗区罗龙东路"}, {"name": "原交通大楼", "admin": "陈晓芳", "sector": "新罗国资-罗龙交易城", "area": "新罗区·西城街道/北城街道（罗龙东路/交易城）", "lng": 117.419923, "lat": 25.298589, "addr": "福建省龙岩市漳平市交通大楼"}, {"name": "原交通大楼外墙", "admin": "陈晓芳", "sector": "新罗国资-罗龙交易城", "area": "新罗区·西城街道/北城街道（罗龙东路/交易城）", "lng": 117.419923, "lat": 25.298589, "addr": "福建省龙岩市漳平市交通大楼"}, {"name": "九一南路3号", "admin": "陈晓芳", "sector": "新罗国资-九一南莲新", "area": "新罗区·西城街道（九一南路/莲新南路）", "lng": 117.032057, "lat": 25.093572, "addr": "福建省龙岩市新罗区九一南路3号"}, {"name": "九一南路3号二层", "admin": "陈晓芳", "sector": "新罗国资-九一南莲新", "area": "新罗区·西城街道（九一南路/莲新南路）", "lng": 117.032057, "lat": 25.093572, "addr": "福建省龙岩市新罗区九一南路3号"}, {"name": "九一南路3号地下室", "admin": "陈晓芳", "sector": "新罗国资-九一南莲新", "area": "新罗区·西城街道（九一南路/莲新南路）", "lng": 117.032057, "lat": 25.093572, "addr": "福建省龙岩市新罗区九一南路3号"}, {"name": "曹溪管理站", "admin": "陈晓芳", "sector": "新罗国资-曹溪", "area": "新罗区·曹溪街道", "lng": 117.023681, "lat": 25.065088, "addr": "福建省龙岩市新罗区曹溪"}, {"name": "工业大厦", "admin": "陈晓芳", "sector": "新罗国资-九一南莲新", "area": "新罗区·西城街道（九一南路/莲新南路）", "lng": 117.036816, "lat": 25.098942, "addr": "福建省龙岩市新罗区"}, {"name": "西安南路26-17号（国资）", "admin": "陈晓芳", "sector": "新罗国资-九一南莲新", "area": "新罗区·西城街道（九一南路/莲新南路）", "lng": 117.027307, "lat": 25.088549, "addr": "福建省龙岩市新罗区西安南路26号"}, {"name": "挺秀花园2#楼", "admin": "陈晓芳", "sector": "新罗国资-北环解放", "area": "新罗区·中城街道/东城街道（北环西路/解放路/和平路）", "lng": 117.03782, "lat": 25.101517, "addr": "福建省龙岩市新罗区挺秀花园"}, {"name": "沁芳轩", "admin": "陈晓芳", "sector": "新罗国资-龙岩大道", "area": "新罗区·西陂街道（龙岩大道交发沁芳轩）", "lng": 117.017362, "lat": 25.075884, "addr": "福建省龙岩市"}, {"name": "登高东美食广场", "admin": "谢德胜", "sector": "新罗国资-美食广场", "area": "新罗区·东城街道（登高东路美食广场）", "lng": 117.017362, "lat": 25.075884, "addr": "福建省龙岩市"}, {"name": "凯丰商厦（国资、惠和）", "admin": "陈晓芳", "sector": "凯丰商厦（国资×五交化）", "area": "新罗区·中城街道（中山路凯丰商厦7层）", "lng": 117.031628, "lat": 25.094993, "addr": "福建省龙岩市新罗区凯丰商厦"}, {"name": "凯丰商厦", "admin": "陈晓芳", "sector": "凯丰商厦（国资×五交化×饮食×果品）", "area": "新罗区·中城街道（中山路凯丰商厦）", "lng": 117.031628, "lat": 25.094993, "addr": "福建省龙岩市新罗区凯丰商厦"}, {"name": "凤凰路（二被）", "admin": "李美清", "sector": "第二被单厂-凤凰路", "area": "新罗区·中城街道（凤凰路）", "lng": 117.028363, "lat": 25.109167, "addr": "福建省龙岩市新罗区凤凰路"}, {"name": "双泉路（酒厂）", "admin": "陈晓芳", "sector": "陈缸酿酒-双泉路", "area": "新罗区·南城街道（双泉路）", "lng": 117.032165, "lat": 25.088109, "addr": "福建省龙岩市新罗区双泉路"}, {"name": "龙川中路（糖酒）", "admin": "陈晓芳", "sector": "惠华糖酒-中城", "area": "新罗区·中城街道（龙川中路/和平路）", "lng": 117.034285, "lat": 25.095624, "addr": "福建省龙岩市新罗区龙川中路"}, {"name": "和平路49号", "admin": "陈晓芳", "sector": "惠华糖酒-中城", "area": "新罗区·中城街道（龙川中路/和平路）", "lng": 117.030414, "lat": 25.100942, "addr": "福建省龙岩市新罗区和平路49号"}, {"name": "中山路（五交化）", "admin": "陈晓芳", "sector": "惠和五交化-中城", "area": "新罗区·中城街道（中山路/龙川中路）", "lng": 117.033004, "lat": 25.096466, "addr": "福建省龙岩市新罗区中山东路"}, {"name": "龙川中路（五交化）", "admin": "陈晓芳", "sector": "惠和五交化-中城", "area": "新罗区·中城街道（中山路/龙川中路）", "lng": 117.034285, "lat": 25.095624, "addr": "福建省龙岩市新罗区龙川中路"}, {"name": "登高西路（五交化）", "admin": "陈晓芳", "sector": "惠和五交化-登高西路", "area": "新罗区·西城街道（登高西路）", "lng": 117.023085, "lat": 25.089694, "addr": "福建省龙岩市新罗区登高西路"}, {"name": "闽西交易城（五交化）", "admin": "陈晓芳", "sector": "惠和五交化-交易城", "area": "新罗区·北城街道（闽西交易城）", "lng": 116.99826, "lat": 25.100487, "addr": "福建省龙岩市新罗区闽西交易城(公交站)"}, {"name": "登高中路108-1号", "admin": "陈晓芳", "sector": "惠成资产-登高东", "area": "新罗区·南城街道（登高东路/挺秀路）", "lng": 117.03919, "lat": 25.094244, "addr": "福建省龙岩市新罗区登高中路108号"}, {"name": "登高中路108-2号", "admin": "陈晓芳", "sector": "惠成资产-登高东", "area": "新罗区·南城街道（登高东路/挺秀路）", "lng": 117.03919, "lat": 25.094244, "addr": "福建省龙岩市新罗区登高中路108号"}, {"name": "龙川中路（惠发）", "admin": "陈晓芳", "sector": "惠成资产-龙川中路", "area": "新罗区·中城街道（龙川中路）", "lng": 117.034285, "lat": 25.095624, "addr": "福建省龙岩市新罗区龙川中路"}, {"name": "莲新南路（惠发）", "admin": "陈晓芳", "sector": "惠成资产-莲新", "area": "新罗区·西城街道（莲新南路/莲花大厦）", "lng": 117.02803, "lat": 25.081509, "addr": "福建省龙岩市新罗区莲新南路"}, {"name": "莲新南路4-2号", "admin": "陈晓芳", "sector": "惠成资产-莲新", "area": "新罗区·西城街道（莲新南路/莲花大厦）", "lng": 117.028645, "lat": 25.080881, "addr": "福建省龙岩市新罗区莲新南路4-5号"}, {"name": "莲新南路4-3号", "admin": "陈晓芳", "sector": "惠成资产-莲新", "area": "新罗区·西城街道（莲新南路/莲花大厦）", "lng": 117.028645, "lat": 25.080881, "addr": "福建省龙岩市新罗区莲新南路4-5号"}, {"name": "莲新南路4-4号", "admin": "陈晓芳", "sector": "惠成资产-莲新", "area": "新罗区·西城街道（莲新南路/莲花大厦）", "lng": 117.028645, "lat": 25.080881, "addr": "福建省龙岩市新罗区莲新南路4-5号"}, {"name": "莲新南路4-5号", "admin": "陈晓芳", "sector": "惠成资产-莲新", "area": "新罗区·西城街道（莲新南路/莲花大厦）", "lng": 117.028645, "lat": 25.080881, "addr": "福建省龙岩市新罗区莲新南路4-5号"}, {"name": "龙岩图书馆（新华书吧）", "admin": "陈晓芳", "sector": "惠成资产-登高东", "area": "新罗区·南城街道（登高东路/挺秀路）", "lng": 117.037436, "lat": 25.096252, "addr": "福建省龙岩市新罗区龙岩图书馆"}, {"name": "矿管大楼一层（惠发）", "admin": "陈晓芳", "sector": "惠成资产-登高东", "area": "新罗区·南城街道（登高东路/挺秀路）", "lng": 117.036816, "lat": 25.098942, "addr": "福建省龙岩市新罗区"}, {"name": "兴晖社区", "admin": "陈晓芳", "sector": "惠成资产-登高东", "area": "新罗区·南城街道（登高东路/挺秀路）", "lng": 117.042371, "lat": 25.099054, "addr": "福建省龙岩市新罗区兴晖社区居委会"}, {"name": "登高东路（惠发）", "admin": "陈晓芳", "sector": "惠成资产-登高东", "area": "新罗区·南城街道（登高东路/挺秀路）", "lng": 117.045182, "lat": 25.104756, "addr": "福建省龙岩市新罗区登高东路"}, {"name": "挺秀路（惠发）", "admin": "陈晓芳", "sector": "惠成资产-登高东", "area": "新罗区·南城街道（登高东路/挺秀路）", "lng": 117.040477, "lat": 25.098615, "addr": "福建省龙岩市新罗区挺秀路"}, {"name": "莲花大厦七层", "admin": "陈晓芳", "sector": "惠成资产-莲新", "area": "新罗区·西城街道（莲新南路/莲花大厦）", "lng": 117.027046, "lat": 25.078762, "addr": "福建省龙岩市新罗区莲花大厦(东南门)"}, {"name": "凤凰路（矿产）", "admin": "李美清", "sector": "矿产工业-凤凰路", "area": "新罗区·中城街道（凤凰路）", "lng": 117.028363, "lat": 25.109167, "addr": "福建省龙岩市新罗区凤凰路"}, {"name": "东宝路（矿产）", "admin": "暂无", "sector": "矿产工业-东宝路", "area": "新罗区·东城街道（东宝路）", "lng": 117.054881, "lat": 25.107512, "addr": "福建省龙岩市新罗区东宝路"}, {"name": "凤凰北路（粮油）", "admin": "李美清", "sector": "粮油加工厂-凤凰路", "area": "新罗区·中城街道（凤凰北路）", "lng": 117.012698, "lat": 25.123103, "addr": "福建省龙岩市新罗区凤凰北路"}, {"name": "原龙港公司", "admin": "陈晓芳", "sector": "腾龙公路-登高东", "area": "新罗区·南城街道（登高东路）", "lng": 117.017362, "lat": 25.075884, "addr": "福建省龙岩市"}, {"name": "九一北路（面粉加工厂）", "admin": "李美清", "sector": "面粉加工厂-中山路", "area": "新罗区·中城街道（九一北路）", "lng": 117.030935, "lat": 25.098477, "addr": "福建省龙岩市新罗区九一北路"}, {"name": "工业中路（糖酒）", "admin": "陈晓芳", "sector": "糖酒公司-工业中路", "area": "新罗区·中城街道（工业中路）", "lng": 117.020879, "lat": 25.111054, "addr": "福建省龙岩市新罗区工业中路"}, {"name": "塔泉大厦（翔丰）", "admin": "李美清", "sector": "翔丰实业-塔泉西安", "area": "新罗区·西城街道（西安南路塔泉大厦）", "lng": 117.027837, "lat": 25.091865, "addr": "福建省龙岩市新罗区塔泉大厦"}, {"name": "塔泉商厦（翔丰）", "admin": "李美清", "sector": "翔丰实业-塔泉西安", "area": "新罗区·西城街道（西安南路塔泉大厦）", "lng": 117.036816, "lat": 25.098942, "addr": "福建省龙岩市新罗区"}, {"name": "塔泉大厦（翔丰）龙津", "admin": "李美清", "sector": "龙津信用-塔泉西安", "area": "新罗区·西城街道（西安南路塔泉大厦）", "lng": 117.027837, "lat": 25.091865, "addr": "福建省龙岩市新罗区塔泉大厦"}, {"name": "曹溪中路（液压）", "admin": "李美清", "sector": "惠华液压-曹溪", "area": "新罗区·曹溪街道", "lng": 117.02775, "lat": 25.060685, "addr": "福建省龙岩市新罗区曹溪中路"}, {"name": "工农路D14#店", "admin": "陈晓芳", "sector": "惠和农机-北环", "area": "新罗区·中城街道（北环西路/解放北路）", "lng": 117.031631, "lat": 25.100191, "addr": "福建省龙岩市新罗区工农路14"}, {"name": "解放北路（农机）", "admin": "陈晓芳", "sector": "惠和农机-北环", "area": "新罗区·中城街道（北环西路/解放北路）", "lng": 117.028805, "lat": 25.11562, "addr": "福建省龙岩市新罗区解放北路"}, {"name": "工业西路(氨厂）", "admin": "李美清", "sector": "惠和化肥-北城", "area": "新罗区·北城街道（工业西路/谢氨路）", "lng": 116.99618, "lat": 25.106997, "addr": "福建省龙岩市新罗区工业西路"}, {"name": "谢氨路（氨厂）", "admin": "李美清", "sector": "惠和化肥-北城", "area": "新罗区·北城街道（工业西路/谢氨路）", "lng": 116.994267, "lat": 25.110625, "addr": "福建省龙岩市新罗区谢氨路"}, {"name": "祥和家苑（化肥）", "admin": "李美清", "sector": "惠和化肥-西陂北", "area": "新罗区·西陂街道（小洋祥和家苑）", "lng": 117.036816, "lat": 25.098942, "addr": "福建省龙岩市新罗区"}, {"name": "中山东路（商总）", "admin": "陈晓芳", "sector": "惠和商管-中山路", "area": "新罗区·中城街道（中山东路）", "lng": 117.033004, "lat": 25.096466, "addr": "福建省龙岩市新罗区中山东路"}, {"name": "龙川中路（商总）", "admin": "李美清", "sector": "惠和商管-龙川解放", "area": "新罗区·中城街道（龙川中路/解放南路）", "lng": 117.034285, "lat": 25.095624, "addr": "福建省龙岩市新罗区龙川中路"}, {"name": "解放南路（商总）", "admin": "李美清", "sector": "惠和商管-龙川解放", "area": "新罗区·中城街道（龙川中路/解放南路）", "lng": 117.032617, "lat": 25.100134, "addr": "福建省龙岩市新罗区解放南路"}, {"name": "登高西路（燃料）", "admin": "李美清", "sector": "惠和燃料-登高西路", "area": "新罗区·西城街道（登高西路）", "lng": 117.023085, "lat": 25.089694, "addr": "福建省龙岩市新罗区登高西路"}, {"name": "溪畔路（燃料）", "admin": "李美清", "sector": "惠和燃料-溪畔路", "area": "新罗区·南城街道（溪畔路）", "lng": 117.038978, "lat": 25.096736, "addr": "福建省龙岩市新罗区溪畔路"}, {"name": "龙铁名苑（燃料）", "admin": "李美清", "sector": "惠和燃料-西陂北", "area": "新罗区·西陂街道（双洋路龙铁名苑）", "lng": 117.044201, "lat": 25.078525, "addr": "福建省龙岩市新罗区龙铁名苑"}, {"name": "中山路（食品）", "admin": "李美清", "sector": "惠翔食品-中城", "area": "新罗区·中城街道（中山路/龙川中路）", "lng": 117.033004, "lat": 25.096466, "addr": "福建省龙岩市新罗区中山东路"}, {"name": "龙川中路（食品）", "admin": "李美清", "sector": "惠翔食品-中城", "area": "新罗区·中城街道（中山路/龙川中路）", "lng": 117.034285, "lat": 25.095624, "addr": "福建省龙岩市新罗区龙川中路"}, {"name": "罗龙西路（食品）", "admin": "李美清", "sector": "惠翔食品-北城", "area": "新罗区·北城街道（工业西路/罗龙西路）", "lng": 116.991539, "lat": 25.101559, "addr": "福建省龙岩市新罗区罗龙西路"}, {"name": "工业西路（食品）", "admin": "李美清", "sector": "惠翔食品-北城", "area": "新罗区·北城街道（工业西路/罗龙西路）", "lng": 116.99618, "lat": 25.106997, "addr": "福建省龙岩市新罗区工业西路"}, {"name": "登高中路（食品）", "admin": "李美清", "sector": "惠翔食品-南城登高", "area": "新罗区·南城街道（登高中路/南环中路）", "lng": 117.034375, "lat": 25.090642, "addr": "福建省龙岩市新罗区登高中路"}, {"name": "西安南路（食品）", "admin": "李美清", "sector": "惠翔食品-西安南路（李）", "area": "新罗区·西城街道（西安南路）", "lng": 117.02503, "lat": 25.088974, "addr": "福建省龙岩市新罗区西安南路"}, {"name": "西安南路（食品）", "admin": "陈晓芳", "sector": "惠翔食品-西安南路（陈）", "area": "新罗区·西城街道（西安南路）", "lng": 117.02503, "lat": 25.088974, "addr": "福建省龙岩市新罗区西安南路"}, {"name": "东肖食品站", "admin": "李美清", "sector": "惠翔食品-东肖", "area": "新罗区·东肖镇", "lng": 117.013761, "lat": 25.04517, "addr": "福建省龙岩市新罗区东肖街道"}, {"name": "东肖食品老站", "admin": "李美清", "sector": "惠翔食品-东肖", "area": "新罗区·东肖镇", "lng": 117.013761, "lat": 25.04517, "addr": "福建省龙岩市新罗区东肖街道"}, {"name": "小池食品站", "admin": "李美清", "sector": "惠翔食品-小池大池", "area": "新罗区·小池镇/大池镇", "lng": 116.097206, "lat": 25.231965, "addr": "福建省龙岩市武平县小池"}, {"name": "大池食品站", "admin": "李美清", "sector": "惠翔食品-小池大池", "area": "新罗区·小池镇/大池镇", "lng": 116.787675, "lat": 25.134838, "addr": "福建省龙岩市新罗区大池"}, {"name": "南环中路（食品）", "admin": "李美清", "sector": "惠翔食品-南城登高", "area": "新罗区·南城街道（登高中路/南环中路）", "lng": 117.045961, "lat": 25.088458, "addr": "福建省龙岩市新罗区南环中路"}, {"name": "龙门食品站", "admin": "李美清", "sector": "惠翔食品-龙门", "area": "新罗区·龙门镇", "lng": 116.48214, "lat": 25.94497, "addr": "福建省龙岩市长汀县龙门"}, {"name": "凤凰北路（棉纺）", "admin": "李美清", "sector": "惠和纺织-凤凰路", "area": "新罗区·中城街道（凤凰北路）", "lng": 117.012698, "lat": 25.123103, "addr": "福建省龙岩市新罗区凤凰北路"}];
+
+// 保存所有边界圆和标签
+var bounds = [];
+var labels = [];
+var boundsVisible = true;
+var labelsVisible = true;
+
+// 创建片区边界
+var layerGroup = new AMap.LayerGroup();
+sectors.forEach(function(sec, i) {
+    var baseColor = adminBase[sec.admin] || '#999';
+    var fillColor = shadeColor(baseColor, 20);  // 浅色填充
+
+    // 圆
+    var circle = new AMap.Circle({
+        center: sec.center,
+        radius: sec.radius,
+        fillOpacity: 0.15,
+        fillColor: fillColor,
+        strokeColor: baseColor,
+        strokeWeight: 2,
+        strokeOpacity: 0.6,
+        strokeStyle: 'dashed',
+        zIndex: 10,
+    });
+    circle.setExtData({sector: sec.name, admin: sec.admin});
+    bounds.push(circle);
+    circle.setMap(map);
+
+    // 边界上的标签
+    var label = new AMap.Text({
+        text: sec.name,
+        position: [sec.center[0] + 0.005, sec.center[1] + 0.003],
+        style: {
+            'font-size': '11px',
+            'color': baseColor,
+            'background': 'rgba(255,255,255,0.85)',
+            'padding': '2px 6px',
+            'border-radius': '3px',
+            'border': '1px solid ' + baseColor,
+            'white-space': 'nowrap',
+        }
+    });
+    labels.push(label);
+    label.setMap(map);
+});
+
+// 创建标记点（用圆形标记代替默认水滴，更快识别）
+var markerLayer = new AMap.LayerGroup();
+markersData.forEach(function(p) {
+    var baseColor = adminBase[p.admin] || '#999';
+    // 找对应片区
+    var sec = sectors.find(function(s) { return s.name === p.sector; });
+    var idx = sec ? sectors.indexOf(sec) : 0;
+    var color = shadeColor(baseColor, -idx * 3);
+
+    var marker = new AMap.CircleMarker({
+        center: [p.lng, p.lat],
+        radius: 8,
+        fillColor: color,
+        fillOpacity: 0.9,
+        strokeColor: '#fff',
+        strokeWeight: 2,
+        strokeOpacity: 1,
+        zIndex: 100,
+        cursor: 'pointer',
+    });
+
+    var content = '<div style="max-width:260px;">' +
+        '<b style="font-size:14px;">' + p.name + '</b><br>' +
+        '<span style="color:#666;font-size:11px;"> 管理员: ' + p.admin + '</span><br>' +
+        '<span style="color:#888;font-size:11px;"> 片区: ' + p.sector + '</span><br>' +
+        '<span style="color:#888;font-size:11px;"> 地址: ' + (p.addr || '') + '</span>' +
+        '</div>';
+
+    marker.on('click', function() {
+        var info = new AMap.InfoWindow({
+            content: content,
+            offset: new AMap.Pixel(0, -20),
+        });
+        info.open(map, [p.lng, p.lat]);
+    });
+
+    marker.setMap(map);
+});
+
+// 切换边界
+function toggleBoundary() {
+    boundsVisible = !boundsVisible;
+    bounds.forEach(function(b) { b.setMap(boundsVisible ? map : null); });
+    labels.forEach(function(l) { l.setMap(labelsVisible && boundsVisible ? map : null); });
+}
+
+// 生成图例
+var legendHtml = '<h3> 惠和资产片区划分</h3>';
+legendHtml += '<div style="margin-bottom:4px;color:#666;">共 <b>' + sectors.length + '</b> 个片区 &nbsp;|&nbsp; <b>' + markersData.length + '</b> 个资产点</div>';
+var admins = ['陈晓芳', '李美清', '谢德胜', '暂无'];
+admins.forEach(function(a) {
+    var secs = sectors.filter(function(s) { return s.admin === a; });
+    if (secs.length === 0) return;
+    var color = adminBase[a] || '#999';
+    legendHtml += '<div style="margin-top:6px;font-weight:bold;color:' + color + ';">' + a + '（' + secs.length + '片区）</div>';
+    secs.forEach(function(s) {
+        var sc = shadeColor(color, -secs.indexOf(s) * 3);
+        legendHtml += '<div class="legend-row" onclick="map.setCenter([' + s.center[0] + ',' + s.center[1] + ']);map.setZoom(15);">' +
+            '<span class="dot" style="background:' + sc + ';"></span>' +
+            s.name + '<span class="count">' + s.count + '项</span></div>';
+    });
+});
+document.getElementById('legend').innerHTML = legendHtml;
+
+// 添加比例尺和缩放控件
+map.addControl(new AMap.Scale());
+map.addControl(new AMap.ToolBar());
+</script>
+</body>
+</html>
