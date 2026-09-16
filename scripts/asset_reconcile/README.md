@@ -19,7 +19,11 @@ python scripts/asset_reconcile/step2_match.py     # 匹配 + 整月粗算 → te
 python scripts/asset_reconcile/step3_refine.py    # 套用免租期精确重算 + 生成结论 → matched.json
 python scripts/asset_reconcile/step4_excel.py     # 生成对账 Excel → 财务累欠表目录
 python scripts/asset_reconcile/step5_verify.py    # 数据正确性校验（应全部通过）
+python scripts/asset_reconcile/step6_fill.py      # 把结论回填进源表副本「应收情况」列（另存副本，不动源表）
 ```
+
+> step6 用 Excel/WPS 的 COM 接口（`fill_via_com.ps1`）只改目标单元格，公式、缓存值、跨文件引用、格式全部原样保留；
+> 因此机器需装有 WPS 表格或 Excel。openpyxl 直写会丢公式缓存值，不可用。
 
 中间文件都放在 `temp/`，可删；最终产出在财务累欠表同目录（`config.py` 的 `OUT_DIR`）。
 

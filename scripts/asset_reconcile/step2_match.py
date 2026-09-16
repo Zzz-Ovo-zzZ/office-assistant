@@ -281,6 +281,7 @@ def main():
         rent = num(c["月租金"]) or 0.0
         calc_amt = round(rent * (c_month_cnt or 0), 2) if c_month_cnt else 0.0
         result.append({
+            "idx": r["idx"], "excel_row": r["excel_row"], "sheet": r["sheet"],
             "板块": r["板块"], "承租人": r["承租人"], "物业编码": r["物业编码"],
             "承租单元": r["承租单元"],
             "财务应收月": r_months, "财务应收月数": r_month_cnt,
@@ -308,6 +309,7 @@ def main():
     for item in unmatched_bill:
         r = item["rec"]
         ub.append({
+            "idx": r["idx"], "excel_row": r["excel_row"], "sheet": r["sheet"],
             "板块": r["板块"], "承租人": r["承租人"], "物业编码": r["物业编码"],
             "承租单元": r["承租单元"], "应收合计": num(r["应收合计"]),
             "实收合计": num(r["实收合计"]), "调整后欠款": num(r["调整后欠款"]),

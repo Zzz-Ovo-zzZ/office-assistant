@@ -27,44 +27,63 @@ def num(v):
 
 
 def load_bill():
-    """财务表三大板块，每行一个房源"""
+    """财务表三大板块，每行一个房源（按表头名定位列，兼容各板块列结构差异）"""
     wb = openpyxl.load_workbook(BILL, read_only=True, data_only=True)
     records = []
+    idx = 0
     for name in ["顺泰", "置业、龙州", "龙津"]:
         ws = wb[name]
-        for i, row in enumerate(ws.iter_rows(values_only=True), 1):
-            if i == 1:
-                continue
-            g = lambda j: row[j] if j < len(row) else None
-            tenant = g(0)
+        rows = ws.iter_rows(values_only=True)
+        header = next(rows)
+        colmap = {str(h).strip(): i for i, h in enumerate(header) if h is not None and str(h).strip()}
+
+        def c(*names):
+            for n in names:
+                if n in colmap:
+                    return colmap[n]
+            return None
+
+        ying_idx = [c(f"{m}月应收") for m in range(1, 13)]
+        shi_idx = [c(f"{m}月实收") for m in range(1, 13)]
+        c_tenant = c("承租人")
+        c_mc = c("物业编码")
+        c_unit = c("承租单元")
+        c_bz = c("备注")
+
+        for i, row in enumerate(rows, 2):
+            g = lambda j: row[j] if (j is not None and j < len(row)) else None
+            tenant = g(c_tenant)
             if tenant is None or str(tenant).strip() == "":
                 continue
             if str(tenant).strip() == "总计":
                 continue
-            # 各月应收(0-based 7..18)、各月实收(20..31)
-            ying_mon = [num(g(k)) for k in range(7, 19)]
-            shi_mon = [num(g(k)) for k in range(20, 32)]
+            ying_mon = [num(g(j)) for j in ying_idx]
+            shi_mon = [num(g(j)) for j in shi_idx]
             rec = {
                 "板块": name,
+                "sheet": name,
+                "idx": idx,
+                "excel_row": i,
                 "承租人": str(tenant).strip(),
-                "物业编码": str(g(1)).strip() if g(1) else "",
-                "承租单元": str(g(2)).strip() if g(2) else "",
-                "24年欠款": num(g(3)),
-                "调整金额": num(g(4)),
-                "调整后24年欠款": num(g(5)),
-                "24年预收25年": num(g(6)),
+                "物业编码": str(g(c_mc)).strip() if g(c_mc) else "",
+                "承租单元": str(g(c_unit)).strip() if g(c_unit) else "",
+                "24年欠款": num(g(c("24年欠款"))),
+                "调整金额": num(g(c("调整金额"))),
+                "调整后24年欠款": num(g(c("调整后24年欠款"))),
+                "24年预收25年": num(g(c("24年预收25年", "24年预收25"))),
                 "应收月": ying_mon,
-                "应收合计": num(g(19)),
+                "应收合计": num(g(c("1-12月应收"))),
                 "实收月": shi_mon,
-                "实收合计": num(g(32)),
-                "欠款合计": num(g(33)),
-                "调整后欠款": num(g(34)),
-                "备注": str(g(35)).strip() if g(35) else "",
+                "实收合计": num(g(c("1-12月实收"))),
+                "欠款合计": num(g(c("1-12月欠款"))),
+                "调整后欠款": num(g(c("调整后1-12月欠款"))),
+                "备注": str(g(c_bz)).strip() if g(c_bz) else "",
             }
             # 财务计费月份(应收>0 的月份, 1-based)
-            rec["财务计费月"] = [i + 1 for i, v in enumerate(ying_mon) if v is not None and v > 0]
+            rec["财务计费月"] = [k + 1 for k, v in enumerate(ying_mon) if v is not None and v > 0]
             rec["财务计费月数"] = len(rec["财务计费月"])
             records.append(rec)
+            idx += 1
     wb.close()
     return records
 
