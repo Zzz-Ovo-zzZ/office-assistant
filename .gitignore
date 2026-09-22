@@ -20,8 +20,9 @@ Thumbs.db
 # Output (reports synced, temp excluded)
 temp/
 
-# Claude Code 本地设置
-.claude/
+# Claude Code 本地设置（skills 例外，需随 git 版本控制共享）
+.claude/*
+!.claude/skills/
 
 # 账单导入匹配脚本（暂不入库）
 scripts/match_bill_project_house.py

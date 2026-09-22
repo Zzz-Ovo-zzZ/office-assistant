@@ -21,17 +21,20 @@
 ├── scripts/                    # 可执行脚本
 │   ├── wedding/                # 婚嫁择日脚本
 │   ├── fitness/                # 健身饮食助手
+│   ├── finance/                # 理财助手 (收益计算/记账/贷款)
 │   ├── utils/                  # 通用工具 (md转html/pdf等)
 │   └── notepad_app/            # 记事本应用
 ├── output/                     # 输出文件（按领域分目录）
 │   ├── wedding/                # 婚嫁报告 (八字合婚/订婚择日/综合规划)
 │   ├── fitness/                # 健身输出 (评估/计划/日志)
+│   ├── finance/                # 理财输出 (对比报告/计划/台账)
 │   └── README.md               # 输出规范说明
 ├── data/                       # 静态数据资源
 │   ├── exercises/              # 锻炼动作库
 │   └── nutrition/              # 食物成分数据
 ├── knowledge/                  # 知识库文档
 │   ├── fitness/                # 健身指南
+│   ├── finance/                # 理财指南
 │   └── wedding/                # 婚嫁知识
 ├── temp/                       # 临时文件（用完即删）
 ├── memory/                     # 跨会话记忆
@@ -135,3 +138,66 @@ python scripts/fitness/cli.py plan      # 生成训练计划
 - Karvonen 心率储备法
 - 周期化训练理论 (线性/波浪/板块)
 - 渐进超负荷原则
+
+## 理财助手
+
+### 能力范围
+
+| 能力 | 说明 |
+|------|------|
+| 收益计算 | 复利/单利/定存/国债/定投/年化收益率/多方案对比 |
+| 记账台账 | CSV 流水记账 + 分类/月度/结余汇总 |
+| 贷款计算 | 等额本息/等额本金/提前还款省息测算 |
+| 财富规划 | 72法则/4%法则/财务自由年限/理财指数/机会成本 |
+| 知识库 | 理财指南 (保本类产品 + 增值类定投/FIRE/资产配置全谱系) |
+
+### 工具模块 (`scripts/finance/`)
+
+| 文件 | 功能 |
+|------|------|
+| `engine.py` | 收益计算引擎 (复利/定存/国债/定投/年化/对比) |
+| `wealth.py` | 财富规划引擎 (72法则/4%法则/理财指数/机会成本/财务自由年限) |
+| `loan.py` | 贷款计算 (等额本息/等额本金/提前还款) |
+| `ledger.py` | 记账台账 (CSV 流水 + 汇总) |
+| `cli.py` | 命令行工具 (compound/deposit/bond/compare/invest/loan/ledger/report/rule72/fire/score/cost/multiple) |
+
+> 资产对账归属本板块：`scripts/asset_reconcile/`（置业财务累欠 vs 合同对账，工作性质）代码保留在原位置，作为「资产对账」子模块。
+
+### 数据资源
+
+- 起步无静态数据，利率/产品参数由用户输入；记账流水为 `output/finance/ledger/*.csv`（Excel/WPS 可编辑）。
+- 知识库 `knowledge/finance/`：`guide.md`（保本/基础主线）+ 10 个增值类专题（dca/fire/allocation/withdraw/math/funds/score/psychology/opportunity-cost）+ `rates-2026.md`（2026 最新利率，含来源）。
+- 本地化 skill `.claude/skills/wealth-shortcut/`：可用 `/wealth-shortcut`、`/理财` 触发全谱系理财顾问。
+
+### 使用示例
+
+```python
+from scripts.finance import compare_deposit_vs_bond
+compare_deposit_vs_bond(本金=100000, 定存利率=1.9, 国债利率=2.2, 年限=3)
+
+from scripts.finance import Ledger
+Ledger().add_entry("2026-09-22", "收入", "工资", 15000, "9月工资")
+
+from scripts.finance import WealthEngine
+WealthEngine.fire_assets(年开支=100000)      # 4%法则: 需 250 万
+WealthEngine.wealth_score(净资产=1000000, 平均年龄=30, 年工资=200000)
+```
+
+```bash
+python scripts/finance/cli.py compare 100000 1.9 2.2 3   # 定存 vs 国债
+python scripts/finance/cli.py loan 1000000 3.5 360        # 贷款对比
+python scripts/finance/cli.py report                      # 台账汇总
+python scripts/finance/cli.py rule72 10                   # 72法则: 7.2 年翻倍
+python scripts/finance/cli.py fire 100000                 # 财务自由所需资产
+python scripts/finance/cli.py score 1000000 30 200000     # 理财指数
+```
+
+### 参考来源
+
+- 复利终值公式 FV = P(1+r/n)^(nt)
+- 等额本息/等额本金标准公式
+- 72法则 / 4%法则 / 理财指数 (源自《财富捷径》投资理念)
+- Estrada (2015) 退休取款率历史验证论文
+- 《存款保险条例》(50 万本息保障)
+- 资管新规 (银行理财净值化、不保本)
+- 2026 最新利率数据见 `knowledge/finance/rates-2026.md`
