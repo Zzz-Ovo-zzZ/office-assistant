@@ -150,6 +150,7 @@ python scripts/fitness/cli.py plan      # 生成训练计划
 | 贷款计算 | 等额本息/等额本金/提前还款省息测算 |
 | 财富规划 | 72法则/4%法则/财务自由年限/理财指数/机会成本 |
 | 知识库 | 理财指南 (保本类产品 + 增值类定投/FIRE/资产配置全谱系) |
+| 智能定投(择时) | 主动投资资金的择时定投增强，引用 stock-value-analyzer 的指数黄金坑「定投系数」，详见 `knowledge/finance/dca-smart.md` |
 
 ### 工具模块 (`scripts/finance/`)
 
