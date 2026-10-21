@@ -26,3 +26,8 @@ temp/
 
 # 账单导入匹配脚本（暂不入库）
 scripts/match_bill_project_house.py
+
+# 专注番茄运行时产物（数据/预览/合成音效自动生成）
+scripts/focus/focus_data.json
+scripts/focus/focus_preview.png
+scripts/focus/sounds/
