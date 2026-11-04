@@ -27,6 +27,10 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+from scripts.console import force_utf8
+
+force_utf8()
+
 from scripts.finance.engine import (
     FinanceEngine, DepositMode, ProductType, Product,
     compare_deposit_vs_bond,
