@@ -90,6 +90,16 @@ python scripts/asset_reconcile/step1_extract.py && python scripts/asset_reconcil
 - **DeepSeek Harness / 其他**：先读 `AGENTS.md`，按其中的「能力路由表」到对应文件。
   DSH 没有 skill 自动发现机制，路由表就是替代方案，能力不打折。
 
+## 常见问题
+
+| 现象 | 原因 | 处理 |
+|------|------|------|
+| `python` 报 `UnicodeEncodeError: 'gbk'` | Windows 控制台默认 GBK | 已内置 `scripts/console.py`，脚本会自动切 UTF-8；自写脚本请 `from scripts.console import force_utf8; force_utf8()` |
+| DSH 里命令全部报 `grantWrite(...)` | 工作区文件夹的 Windows 权限不属于当前用户 | 把会话切到「完全权限」，或对该文件夹取得所有权后再修复权限 |
+| 对账/应收脚本提示"找不到数据文件" | `config.local.json` 未指向本机数据盘 | 改 `synology_root` / `paths.*`，或设 `OFFICE_PATH_*` |
+| 择日脚本报 `No module named lunar_python` | 没装依赖 | `python -m pip install -r requirements.txt` |
+| 番茄钟没有托盘图标 | 缺可选依赖 | `python -m pip install pystray pillow` |
+
 ## 数据与隐私
 
 ⚠️ 本仓库包含生辰八字、家庭财务、婚期安排，以及公司资产/合同/应收数据。
