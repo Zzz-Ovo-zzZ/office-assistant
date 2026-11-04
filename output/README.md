@@ -16,6 +16,10 @@ output/
 │   ├── reports/      # 对比报告 (定存vs国债等)
 │   ├── plans/        # 理财/储蓄/投资计划
 │   └── ledger/       # 记账流水 CSV + 汇总报表
+├── interior/         # 室内设计相关输出
+│   ├── renderings/   # 生成的效果图 (png)
+│   ├── plans/        # 设计方案
+│   └── shopping/     # 家具购物清单
 └── README.md         # 本文件
 ```
 

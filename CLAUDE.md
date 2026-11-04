@@ -11,7 +11,7 @@
 | 模块 | 说明 |
 |------|------|
 | 办公自动化 | 日常工作流程自动化脚本 |
-| 生活规划 | 婚嫁择日、事件筹备、预算管理、行程安排 |
+| 生活规划 | 婚嫁择日、事件筹备、室内设计、预算管理、行程安排 |
 | 知识管理 | 备忘录、决策记录、经验沉淀 |
 
 ## 目录结构
@@ -28,6 +28,7 @@
 │   ├── wedding/                # 婚嫁报告 (八字合婚/订婚择日/综合规划)
 │   ├── fitness/                # 健身输出 (评估/计划/日志)
 │   ├── finance/                # 理财输出 (对比报告/计划/台账)
+│   ├── interior/               # 室内设计输出 (效果图/方案/购物清单)
 │   └── README.md               # 输出规范说明
 ├── data/                       # 静态数据资源
 │   ├── exercises/              # 锻炼动作库
@@ -35,6 +36,7 @@
 ├── knowledge/                  # 知识库文档
 │   ├── fitness/                # 健身指南
 │   ├── finance/                # 理财指南
+│   ├── interior/               # 室内设计 (色彩/灯光/空间/风格/家具)
 │   └── wedding/                # 婚嫁知识
 ├── temp/                       # 临时文件（用完即删）
 ├── memory/                     # 跨会话记忆
@@ -202,3 +204,39 @@ python scripts/finance/cli.py score 1000000 30 200000     # 理财指数
 - 《存款保险条例》(50 万本息保障)
 - 资管新规 (银行理财净值化、不保本)
 - 2026 最新利率数据见 `knowledge/finance/rates-2026.md`
+
+## 室内软装设计
+
+### 能力范围
+
+| 能力 | 说明 |
+|------|------|
+| 读图分析 | 读房间照片/户型图，识别尺寸/门窗/硬装/现有家具，输出 12 项分析 |
+| 专业设计 | 色彩(孟塞尔+60-30-10)、灯光(四层布光+色温)、空间(动线+家具间隙)、风格(6大风格) |
+| 效果图生成 | 硅基流动 API (FLUX 模型)，支持文生图 + 图生图(现场照换风格/加家具) |
+| 家具选购 | 中国家具国标尺寸 + 板材材质辨别 + 选购避坑 |
+
+### 工具模块
+
+| 位置 | 功能 |
+|------|------|
+| `.claude/skills/interior-design/` | 室内设计 skill (`SKILL.md` 方法论 + `scripts/render.py` 生图脚本) |
+| `knowledge/interior/` | 知识库 (design-guide/color-science/lighting-design/space-planning/style-guide/furniture-spec/shopping-guide) |
+| `output/interior/` | 输出 (renderings 效果图 / plans 方案 / shopping 购物清单) |
+
+### 生图脚本用法
+
+```bash
+python .claude/skills/interior-design/scripts/render.py text2img --prompt "..." --model flux-dev
+python .claude/skills/interior-design/scripts/render.py img2img --image 房间.jpg --prompt "..." --model flux-dev
+python .claude/skills/interior-design/scripts/render.py models   # 列出可用模型
+```
+
+> 依赖 `pip install requests`；API key 免费注册 cloud.siliconflow.cn，写入 skill 目录 `.env` 文件。
+
+### 参考来源
+
+- interior-vibing (GitHub) — 生图流程方法论 (房间分析/prompt/deck)
+- interior-design-expert (GitHub, Apache-2.0) — 色彩/灯光/空间/风格专业内核
+- zhuangxiu-skills (GitHub, 西安装修课堂) — 中文家具软装选购实战
+- GB/T 3326/3327/3328 + QB/T 1952.1 — 中国家具国标尺寸
