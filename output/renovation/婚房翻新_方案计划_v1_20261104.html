@@ -26,6 +26,15 @@
   ul,ol { margin:8px 0 8px 22px; }
   li { margin:5px 0; }
   code { background:#F2EADA; padding:1px 5px; border-radius:3px; font-size:9.5pt; }
+  .palette { display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 10px; }
+  .pc { width:31.5%; box-sizing:border-box; background:#fff; border:1px solid #E6DAC4;
+        border-radius:10px; overflow:hidden; page-break-inside:avoid; }
+  .pc .band { height:54px; border-bottom:1px solid #E6DAC4; }
+  .pc b { display:block; padding:8px 10px 0; font-size:10.5pt; color:#3A332B; }
+  .pc code { display:block; padding:0 10px; background:none; font-size:9pt; color:#8A7756; }
+  .pc i { display:block; padding:2px 10px 10px; font-size:8.8pt; color:#5B4B33;
+          font-style:normal; line-height:1.55; }
+  @media print { .pc { width:31.5%; } }
   @media print { body { background:#fff; } .wrap { box-shadow:none; padding:0; max-width:none; } }
 </style></head>
 <body><div class="wrap">
@@ -79,54 +88,21 @@
 <hr />
 <h2>三、颜色怎么定</h2>
 <p>主色系四件套：<strong>米杏 + 灰 + 黑 + 原木</strong>。灰蓝只留一点点做点缀，不当主色。</p>
-<table>
-<thead>
-<tr>
-<th>颜色</th>
-<th>色号</th>
-<th>像什么</th>
-<th>用在哪</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>暖米杏</td>
-<td><code>#E8DCC8</code></td>
-<td>像兑了牛奶的奶茶色</td>
-<td>墙面、床品、纱帘</td>
-</tr>
-<tr>
-<td>暖白</td>
-<td><code>#F5F1E8</code></td>
-<td>米白偏黄，不刺眼</td>
-<td>顶面、柜门（柜子本身偏白时）</td>
-</tr>
-<tr>
-<td>中灰 / 深灰</td>
-<td><code>#9A9A96</code> / <code>#5A5A57</code></td>
-<td>雾灰，不是冷灰</td>
-<td>窗帘、地毯、单椅</td>
-</tr>
-<tr>
-<td>近黑</td>
-<td><code>#1F1F1D</code></td>
-<td>哑光黑，不是亮黑</td>
-<td>灯架、把手、画框、椅腿</td>
-</tr>
-<tr>
-<td>原木 / 胡桃</td>
-<td><code>#C4A574</code> / <code>#7A5A3C</code></td>
-<td>跟现有柜子取同一族</td>
-<td>桌面、边几、衣帽架</td>
-</tr>
-<tr>
-<td>香槟金 / 陶土红</td>
-<td><code>#C9A86A</code> / <code>#A65A4A</code></td>
-<td>一点点就够</td>
-<td>五金、花器、婚房小物</td>
-</tr>
-</tbody>
-</table>
+<div class="palette">
+  <div class="pc"><div class="band" style="background:#E8DCC8"></div><b>暖米杏</b><code>#E8DCC8</code><i>像兑了牛奶的奶茶色<br>墙面 · 床品 · 纱帘</i></div>
+  <div class="pc"><div class="band" style="background:#F5F1E8"></div><b>暖白</b><code>#F5F1E8</code><i>米白偏黄，不刺眼<br>顶面 · 柜门</i></div>
+  <div class="pc"><div class="band" style="background:#9A9A96"></div><b>中灰</b><code>#9A9A96</code><i>雾灰，不是冷灰<br>窗帘 · 地毯 · 单椅</i></div>
+  <div class="pc"><div class="band" style="background:#5A5A57"></div><b>深灰</b><code>#5A5A57</code><i>压得住空间<br>沙发 · 床头软包</i></div>
+  <div class="pc"><div class="band" style="background:#1F1F1D"></div><b>近黑</b><code>#1F1F1D</code><i>哑光黑，不是亮黑<br>灯架 · 把手 · 画框</i></div>
+  <div class="pc"><div class="band" style="background:#C4A574"></div><b>原木</b><code>#C4A574</code><i>跟现有柜子取同一族<br>桌面 · 边几</i></div>
+  <div class="pc"><div class="band" style="background:#7A5A3C"></div><b>胡桃</b><code>#7A5A3C</code><i>深木色，压场<br>小件家具 · 画框</i></div>
+  <div class="pc"><div class="band" style="background:#C9A86A"></div><b>香槟金</b><code>#C9A86A</code><i>一点点就够<br>五金 · 灯具</i></div>
+  <div class="pc"><div class="band" style="background:#A65A4A"></div><b>陶土红</b><code>#A65A4A</code><i>婚房的那点红<br>花器 · 抱枕 · 小物</i></div>
+</div>
+
+<blockquote>
+<p>上面是屏幕色，刷墙请拿色卡到现场比：<strong>在你们家自己的灯光下看</strong>，跟店里灯光下会不一样。</p>
+</blockquote>
 <p><strong>关键原则</strong>：先看柜子是什么颜色，再定墙色。</p>
 <ul>
 <li>柜子偏白或浅灰 → 米杏打底，最稳最显干净；</li>
