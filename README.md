@@ -105,7 +105,8 @@ python scripts/asset_reconcile/step1_extract.py && python scripts/asset_reconcil
 ⚠️ 本仓库包含生辰八字、家庭财务、婚期安排，以及公司资产/合同/应收数据。
 **建议保持私有仓库**；如需分享，先删除 `output/`、`memory/` 与 `girlfriend/`。
 
-`config.local.json`、`.env`、`temp/`、运行时数据（番茄钟统计、笔记内容）均已被 `.gitignore` 排除。
+`config.local.json`、`.env`、`temp/`、番茄钟统计（`focus_data.json`）已被 `.gitignore` 排除。
+`output/float_notepad.txt`（记事本内容）仍被跟踪，但**建议不要把本机笔记提交**——两台机器各写各的，提交后再 pull 会冲突。
 
 ## 许可
 
