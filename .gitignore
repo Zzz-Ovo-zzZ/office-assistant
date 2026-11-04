@@ -21,9 +21,8 @@ Thumbs.db
 config.local.json
 *.local.py
 
-# 运行时数据（番茄钟统计、笔记内容随机器走）
+# 运行时数据（番茄钟统计随机器走；记事本内容仍跟踪，便于两台机器同步）
 scripts/focus/focus_data.json
-output/float_notepad.txt
 
 # Output (reports synced, temp excluded)
 temp/
