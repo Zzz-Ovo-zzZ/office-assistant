@@ -1,0 +1,36 @@
+{
+  "_说明": "按用户手绘示意图重建。单位 mm，坐标原点=主卧内墙西北角，x 向东、y 向南。【尺寸仍为估算占位，待实测】上=飘窗+深灰台面桌(接衣柜)，右=通顶衣柜，下=门(右段)+厕所隔墙(左段)，左=窄窗，中间=床。左墙杏米桌按『白色桌子不留』已移除。",
+  "project": "婚房翻新_2026",
+  "unit": "mm",
+  "rooms": [
+    {
+      "id": "master",
+      "name": "主卧",
+      "inner": { "w": 3600, "d": 5000, "h": 2800 },
+      "openings": [
+        { "type": "window", "wall": "north", "offset": 500, "width": 1800, "sill": 450, "height": 1500 },
+        { "type": "door", "wall": "south", "offset": 2100, "width": 900, "swing": "in-left" },
+        { "type": "window", "wall": "west", "offset": 2800, "width": 1000, "sill": 1200, "height": 1300 }
+      ],
+      "cabinets": [
+        { "name": "通顶衣柜", "x": 3000, "y": 1200, "w": 600, "depth": 3200, "h": 2400, "color": "暖白", "keep": true, "role": "wardrobe" }
+      ],
+      "tables": [
+        { "name": "深灰台面桌", "x": 3000, "y": 0, "w": 600, "depth": 1200, "h": 750, "color": "灰", "keep": true, "role": "desk" }
+      ],
+      "fixed": [
+        { "name": "飘窗台(白)", "x": 500, "y": 0, "w": 1800, "depth": 500, "h": 450 },
+        { "name": "主卧厕所", "x": 0, "y": 3800, "w": 1600, "depth": 1200, "h": 2400 }
+      ],
+      "proposed": [
+        { "name": "床1.8m·黑皮靠背", "x": 0, "y": 900, "w": 2000, "depth": 1800, "h": 1100, "role": "bed" }
+      ],
+      "lighting": [
+        { "type": "wall", "x": 150, "y": 1000, "label": "床头灯 2700K" },
+        { "type": "wall", "x": 150, "y": 2600, "label": "床头灯 2700K" },
+        { "type": "ceiling", "x": 1800, "y": 2200, "label": "吸顶 3000K" },
+        { "type": "ceiling", "x": 2700, "y": 1800, "label": "柜前筒灯" }
+      ]
+    }
+  ]
+}

@@ -280,7 +280,7 @@ def draw_room(room: dict, s: int, layer: str = "plan") -> str:
         elif kind == "table":
             fill, stroke, dash = TABLE_FILL, "#4F6D85", ""
         elif kind == "proposed":
-            fill, stroke, dash = NEW_FILL, "#7E93A8", f'stroke-dasharray="{s*40},{s*25}"'
+            fill, stroke, dash = NEW_FILL, "#7E93A8", f'stroke-dasharray="{s*12},{s*7}"'
         else:
             fill, stroke, dash = FIXED_FILL, "#8A8A85", ""
         out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{d}" fill="{fill}" stroke="{stroke}" '
@@ -293,13 +293,23 @@ def draw_room(room: dict, s: int, layer: str = "plan") -> str:
         if kind == "proposed":
             label = "+" + label
         fs1, fs2 = 2.9 * s, 2.5 * s
+        text = f'{label} {dims}'
         if w / s > 22 and d / s > 10:
             out.append(f'<text x="{x + w/2}" y="{y + d/2 - s*0.4}" font-size="{fs1}" text-anchor="middle" '
                        f'fill="#2F2F2C" font-family="{FONT}" font-weight="600">{label}</text>')
             out.append(f'<text x="{x + w/2}" y="{y + d/2 + s*3.4}" font-size="{fs2}" text-anchor="middle" '
                        f'fill="#4A4A46" font-family="{FONT}">{dims}</text>')
+        elif w / s <= 22 and d / s > 10:
+            # 窄而高（如贴墙衣柜）：文字竖排放在块内，避免被墙线压住
+            cx, cy = x + w / 2, y + d / 2
+            out.append(f'<text x="{cx}" y="{cy}" font-size="{fs2:.2f}" text-anchor="middle" '
+                       f'fill="#2F2F2C" font-family="{FONT}" transform="rotate(-90 {cx} {cy})">{text}</text>')
+        elif x + w + s * 2 + len(text) * fs2 * 0.95 > W:
+            # 右侧放不下：翻到左侧右对齐
+            out.append(f'<text x="{x - s*2}" y="{y + d/2}" font-size="{fs2}" text-anchor="end" '
+                       f'fill="#4A4A46" font-family="{FONT}">{text}</text>')
         else:
-            out.append(f'<text x="{x + w + s*2}" y="{y + d/2}" font-size="{fs2}" fill="#4A4A46" font-family="{FONT}">{label} {dims}</text>')
+            out.append(f'<text x="{x + w + s*2}" y="{y + d/2}" font-size="{fs2}" fill="#4A4A46" font-family="{FONT}">{text}</text>')
 
     # 尺寸线
     out.append(_dim_h(0, W, -MARGIN * 0.55, f"{int(W)}", s))

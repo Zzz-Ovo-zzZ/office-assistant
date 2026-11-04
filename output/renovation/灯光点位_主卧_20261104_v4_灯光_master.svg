@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420mm" height="297mm" viewBox="0 0 420 297">
+<rect x="0" y="0" width="420" height="297" fill="#FFFFFF"/>
+<g transform="translate(150.00 58.72) scale(0.033333)">
+<rect x="-120" y="-120" width="3840" height="5240" fill="#4A4A48"/>
+<rect x="0" y="0" width="3600" height="5000" fill="#FBFAF6"/>
+<rect x="500" y="-120" width="1800" height="120" fill="#FBFAF6"/>
+<line x1="500" y1="-96.0" x2="2300" y2="-96.0" stroke="#5B7C99" stroke-width="5.3999999999999995"/>
+<line x1="500" y1="-60.0" x2="2300" y2="-60.0" stroke="#5B7C99" stroke-width="5.3999999999999995"/>
+<line x1="500" y1="-24.0" x2="2300" y2="-24.0" stroke="#5B7C99" stroke-width="5.3999999999999995"/>
+<rect x="2100" y="5000" width="900" height="120" fill="#FBFAF6"/>
+<path d="M 2100 5000 A 900 900 0 0 1 3000 5000" fill="none" stroke="#8A8A85" stroke-width="6.0" stroke-dasharray="750,600"/>
+<rect x="-120" y="2800" width="120" height="1000" fill="#FBFAF6"/>
+<line x1="-96.0" y1="2800" x2="-96.0" y2="3800" stroke="#5B7C99" stroke-width="5.3999999999999995"/>
+<line x1="-60.0" y1="2800" x2="-60.0" y2="3800" stroke="#5B7C99" stroke-width="5.3999999999999995"/>
+<line x1="-24.0" y1="2800" x2="-24.0" y2="3800" stroke="#5B7C99" stroke-width="5.3999999999999995"/>
+<rect x="3000" y="1200" width="600" height="3200" fill="#F1ECE3" stroke="#6B6257" stroke-width="9.0" />
+<text x="3300.0" y="2800.0" font-size="75.00" text-anchor="middle" fill="#2F2F2C" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif" transform="rotate(-90 3300.0 2800.0)">通顶衣柜 600×3200×2400</text>
+<rect x="3000" y="0" width="600" height="1200" fill="#D9E2EA" stroke="#4F6D85" stroke-width="9.0" />
+<text x="3300.0" y="600.0" font-size="75.00" text-anchor="middle" fill="#2F2F2C" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif" transform="rotate(-90 3300.0 600.0)">深灰台面桌 600×1200×750</text>
+<rect x="500" y="0" width="1800" height="500" fill="#CFCFCB" stroke="#8A8A85" stroke-width="9.0" />
+<text x="1400.0" y="238.0" font-size="87.0" text-anchor="middle" fill="#2F2F2C" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif" font-weight="600">飘窗台(白)</text>
+<text x="1400.0" y="352.0" font-size="75.0" text-anchor="middle" fill="#4A4A46" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif">1800×500×450</text>
+<rect x="0" y="3800" width="1600" height="1200" fill="#CFCFCB" stroke="#8A8A85" stroke-width="9.0" />
+<text x="800.0" y="4388.0" font-size="87.0" text-anchor="middle" fill="#2F2F2C" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif" font-weight="600">主卧厕所</text>
+<text x="800.0" y="4502.0" font-size="75.0" text-anchor="middle" fill="#4A4A46" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif">1600×1200×2400</text>
+<rect x="0" y="900" width="2000" height="1800" fill="#EDF1F4" stroke="#7E93A8" stroke-width="9.0" stroke-dasharray="360,210"/>
+<text x="1000.0" y="1788.0" font-size="87.0" text-anchor="middle" fill="#2F2F2C" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif" font-weight="600">+床1.8m·黑皮靠背</text>
+<text x="1000.0" y="1902.0" font-size="75.0" text-anchor="middle" fill="#4A4A46" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif">2000×1800×1100</text>
+<line x1="0" y1="-495.00000000000006" x2="3600" y2="-495.00000000000006" stroke="#444" stroke-width="6.0"/><line x1="0" y1="-549.0" x2="0" y2="-441.00000000000006" stroke="#444" stroke-width="6.0"/><line x1="3600" y1="-549.0" x2="3600" y2="-441.00000000000006" stroke="#444" stroke-width="6.0"/><text x="1800.0" y="-531.0" font-size="84.0" text-anchor="middle" fill="#444" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif">3600</text>
+<line x1="0" y1="5495.0" x2="3600" y2="5495.0" stroke="#444" stroke-width="6.0"/><line x1="0" y1="5441.0" x2="0" y2="5549.0" stroke="#444" stroke-width="6.0"/><line x1="3600" y1="5441.0" x2="3600" y2="5549.0" stroke="#444" stroke-width="6.0"/><text x="1800.0" y="5459.0" font-size="84.0" text-anchor="middle" fill="#444" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif">3600</text>
+<line x1="-495.00000000000006" y1="0" x2="-495.00000000000006" y2="5000" stroke="#444" stroke-width="6.0"/><line x1="-549.0" y1="0" x2="-441.00000000000006" y2="0" stroke="#444" stroke-width="6.0"/><line x1="-549.0" y1="5000" x2="-441.00000000000006" y2="5000" stroke="#444" stroke-width="6.0"/><text x="-531.0" y="2500.0" font-size="84.0" text-anchor="middle" fill="#444" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif" transform="rotate(-90 -531.0 2500.0)">5000</text>
+<line x1="4095.0" y1="0" x2="4095.0" y2="5000" stroke="#444" stroke-width="6.0"/><line x1="4041.0" y1="0" x2="4149.0" y2="0" stroke="#444" stroke-width="6.0"/><line x1="4041.0" y1="5000" x2="4149.0" y2="5000" stroke="#444" stroke-width="6.0"/><text x="4059.0" y="2500.0" font-size="84.0" text-anchor="middle" fill="#444" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif" transform="rotate(-90 4059.0 2500.0)">5000</text>
+<circle cx="150" cy="1000" r="30.0" fill="#FFF" stroke="#C98A2E" stroke-width="5.3999999999999995"/>
+<line x1="120.0" y1="1000" x2="180.0" y2="1000" stroke="#C98A2E" stroke-width="4.2"/>
+<line x1="150" y1="970.0" x2="150" y2="1030.0" stroke="#C98A2E" stroke-width="4.2"/>
+<text x="183.0" y="1102.0" font-size="63.0" fill="#8A5A12" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif" style="paint-order:stroke" stroke="#FFFFFF" stroke-width="24.0">床头灯 2700K</text>
+<circle cx="150" cy="2600" r="30.0" fill="#FFF" stroke="#C98A2E" stroke-width="5.3999999999999995"/>
+<line x1="120.0" y1="2600" x2="180.0" y2="2600" stroke="#C98A2E" stroke-width="4.2"/>
+<line x1="150" y1="2570.0" x2="150" y2="2630.0" stroke="#C98A2E" stroke-width="4.2"/>
+<text x="183.0" y="2702.0" font-size="63.0" fill="#8A5A12" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif" style="paint-order:stroke" stroke="#FFFFFF" stroke-width="24.0">床头灯 2700K</text>
+<circle cx="1800" cy="2200" r="30.0" fill="#FFF" stroke="#C98A2E" stroke-width="5.3999999999999995"/>
+<line x1="1770.0" y1="2200" x2="1830.0" y2="2200" stroke="#C98A2E" stroke-width="4.2"/>
+<line x1="1800" y1="2170.0" x2="1800" y2="2230.0" stroke="#C98A2E" stroke-width="4.2"/>
+<text x="1833.0" y="2302.0" font-size="63.0" fill="#8A5A12" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif" style="paint-order:stroke" stroke="#FFFFFF" stroke-width="24.0">吸顶 3000K</text>
+<circle cx="2700" cy="1800" r="30.0" fill="#FFF" stroke="#C98A2E" stroke-width="5.3999999999999995"/>
+<line x1="2670.0" y1="1800" x2="2730.0" y2="1800" stroke="#C98A2E" stroke-width="4.2"/>
+<line x1="2700" y1="1770.0" x2="2700" y2="1830.0" stroke="#C98A2E" stroke-width="4.2"/>
+<text x="2733.0" y="1902.0" font-size="63.0" fill="#8A5A12" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif" style="paint-order:stroke" stroke="#FFFFFF" stroke-width="24.0">柜前筒灯</text>
+<path d="M 4095.0 -558.0 l -90 210 l 90 -66.0 l 90 66.0 z" fill="#3A3A38"/>
+<text x="4095.0" y="-603.0" font-size="72.0" text-anchor="middle" fill="#3A3A38" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif">N</text>
+<text x="0" y="5855.0" font-size="102.0" fill="#2F2F2C" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif" font-weight="700">主卧　3600×5000mm　18.0㎡　1:30</text>
+<text x="0" y="5675.0" font-size="66.0" fill="#7A7A74" font-family="Microsoft YaHei, PingFang SC, Source Han Sans SC, sans-serif">实线=现有柜/桌　虚线=新增家具　灰色=固定构件（柱/梁）</text>
+</g></svg>
