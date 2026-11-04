@@ -369,6 +369,10 @@ def export_html(html_path: Path, png_path: Path, pdf_path: Path, pages: int) -> 
     url = "file:///" + quote(html_path.as_posix())
     profile_dir = Path(tempfile.mkdtemp(prefix="edge_headless_"))
 
+    # 先删旧文件：Edge 在目标已存在时可能静默失败，留着旧文件会造成"看起来成功"
+    for p in (pdf_path, png_path):
+        p.unlink(missing_ok=True)
+
     def run(args: list[str]) -> subprocess.CompletedProcess:
         return subprocess.run([edge, "--headless=new", "--disable-gpu", "--no-first-run",
                                f"--user-data-dir={profile_dir}", *args],
