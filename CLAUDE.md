@@ -232,6 +232,15 @@ python scripts/finance/cli.py score 1000000 30 200000     # 理财指数
 - 资管新规 (银行理财净值化、不保本)
 - 2026 最新利率数据见 `knowledge/finance/rates-2026.md`
 
+## 装修设计（婚房翻新项目）
+
+- 项目目录：`output/renovation/`（与 `output/wedding` 同级），详见其 `README.md`。
+- 硬约束：既有成品柜**不可拆**，桌子可移位/替换；只做墙色、软装、灯具、局部家具，不动水电与门窗洞。
+- 配色主系统：**米杏 + 灰 + 黑 + 原木**；灰蓝仅作 ≤10% 点缀。三条支路（柜体偏白/偏暖木/偏深）见 `knowledge/interior/renovation-constraints.md`。
+- 平面图工具：`scripts/renovation/floorplan.py` — `draw`（SVG/HTML/PNG/PDF + 尺寸总表）、`check`（动线自检，硬违规退出码 1）、`table`、`selftest`。
+- 批量出图：`scripts/renovation/render_batch.py`；生图优先 `render.py edit`（`Qwen-Image-Edit-2509`，保留柜体/门窗/地板结构），失败降级 `img2img`（Z-Image）。
+- 数据源：`output/renovation/现状_测量数据.json`，单位 mm，坐标原点 = 各房内墙西北角（x 向东、y 向南）。
+
 ## 室内软装设计
 
 ### 能力范围
@@ -240,7 +249,7 @@ python scripts/finance/cli.py score 1000000 30 200000     # 理财指数
 |------|------|
 | 读图分析 | 读房间照片/户型图，识别尺寸/门窗/硬装/现有家具，输出 12 项分析 |
 | 专业设计 | 色彩(孟塞尔+60-30-10)、灯光(四层布光+色温)、空间(动线+家具间隙)、风格(6大风格) |
-| 效果图生成 | 硅基流动 API (FLUX 模型)，支持文生图 + 图生图(现场照换风格/加家具) |
+| 效果图生成 | 硅基流动 API（Z-Image / Qwen-Image / **Qwen-Image-Edit**），支持文生图、图生图、指令式编辑（保留结构改局部） |
 | 家具选购 | 中国家具国标尺寸 + 板材材质辨别 + 选购避坑 |
 
 ### 工具模块
@@ -254,8 +263,9 @@ python scripts/finance/cli.py score 1000000 30 200000     # 理财指数
 ### 生图脚本用法
 
 ```bash
-python .claude/skills/interior-design/scripts/render.py text2img --prompt "..." --model flux-dev
-python .claude/skills/interior-design/scripts/render.py img2img --image 房间.jpg --prompt "..." --model flux-dev
+python .claude/skills/interior-design/scripts/render.py text2img --prompt "..." --model z-image
+python .claude/skills/interior-design/scripts/render.py img2img  --image 房间.jpg --prompt "..." --model z-image
+python .claude/skills/interior-design/scripts/render.py edit     --image 房间.jpg --prompt "保留柜体门窗，只换墙色与软装" --model qwen-edit-2509
 python .claude/skills/interior-design/scripts/render.py models   # 列出可用模型
 ```
 

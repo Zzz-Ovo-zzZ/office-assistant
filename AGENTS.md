@@ -19,6 +19,7 @@ Claude Code 里可用 `/wealth-shortcut`、`/理财` 触发 skill；别的 harne
 |--------|------|------|
 | 理财 / 定投 / 国债 / 财务自由 | [.claude/skills/wealth-shortcut/SKILL.md](.claude/skills/wealth-shortcut/SKILL.md) | `scripts/finance/` 计算 |
 | 室内设计 / 软装 / 效果图 | [.claude/skills/interior-design/SKILL.md](.claude/skills/interior-design/SKILL.md) | `knowledge/interior/`、`render.py` |
+| 装修 / 局部翻新 / 平面图 | [output/renovation/README.md](output/renovation/README.md) | `scripts/renovation/`（floorplan / render_batch） |
 | 婚嫁 / 择日 / 八字 | `CLAUDE.md` 择日规则库 + [scripts/wedding/](scripts/wedding/) | `lunar-python` + `cnlunar` 双源 |
 | 健身 / 减脂 / 吃多少 | [knowledge/fitness/guide.md](knowledge/fitness/guide.md) | `scripts/fitness/` |
 | 考编 / 岗位 / 备考 | [knowledge/kaobian/README.md](knowledge/kaobian/README.md) | `scripts/kaobian/` |

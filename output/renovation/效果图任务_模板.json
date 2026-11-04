@@ -1,0 +1,30 @@
+{
+  "_说明": "效果图任务模板。复制为 效果图任务.json 后按房间/方案填写；image 为现场照路径，输出文件名用 id。mode: edit（默认，保结构）或 img2img（降级）。",
+  "project": "婚房翻新_2026",
+  "tasks": [
+    {
+      "id": "A_master_01",
+      "scheme": "A_米杏原木",
+      "room": "主卧",
+      "mode": "edit",
+      "image": "output/renovation/照片/主卧/01.jpg",
+      "prompt": "保持原有衣柜、门窗、地板与床的位置完全不变，只做软装：墙面暖米杏#E8DCC8，床品米白亚麻，两个中灰抱枕，床头一幅低饱和装饰画，右侧黑色细杆落地灯，2700K暖光，写实室内摄影，广角，横向构图",
+      "seed": 101,
+      "size": "landscape",
+      "model": "qwen-edit-2509",
+      "output": "output/renovation/效果图/A_米杏原木"
+    },
+    {
+      "id": "B_study_01",
+      "scheme": "B_灰调简约",
+      "room": "书房",
+      "mode": "edit",
+      "image": "output/renovation/照片/书房/01.jpg",
+      "prompt": "保持原有书柜、书桌、门窗与地板完全不变，只做软装：墙面浅灰白，桌面深灰皮革桌垫，黑色细框台灯，原木椅，书架局部留白摆放，3000K环境光+4000K任务光，写实摄影",
+      "seed": 303,
+      "size": "landscape",
+      "model": "qwen-edit-2509",
+      "output": "output/renovation/效果图/B_灰调简约"
+    }
+  ]
+}

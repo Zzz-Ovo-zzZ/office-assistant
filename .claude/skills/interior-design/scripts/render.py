@@ -22,6 +22,7 @@ API Key:
 
 import argparse
 import base64
+import json
 import os
 import sys
 from datetime import datetime
@@ -47,6 +48,10 @@ MODELS = {
     "z-image-turbo": "Tongyi-MAI/Z-Image-Turbo",  # 快速版
     "qwen-image":    "Qwen/Qwen-Image",           # 通义千问生图
     "kolors":        "Kwai-Kolors/Kolors",        # 快手可图（中文理解强）
+    "moss":          "OpenMOSS-Team/MOSS-Image",  # 开源多模态生图
+    # 指令式图像编辑：保留原图结构，只改指定内容（室内改造首选）
+    "qwen-edit":     "Qwen/Qwen-Image-Edit",
+    "qwen-edit-2509": "Qwen/Qwen-Image-Edit-2509",
 }
 
 # 图片尺寸（宽x高）
@@ -104,11 +109,18 @@ def encode_image(image_path: str) -> str:
     return f"data:{mime};base64,{data}"
 
 
-def download_image(url: str, output_dir: Path, prefix: str = "render") -> str:
+def download_image(url: str, output_dir: Path, prefix: str = "render", stem: str | None = None) -> str:
     """下载生成的图片到本地（硅基流动返回的 URL 仅 1 小时有效）。"""
     output_dir.mkdir(parents=True, exist_ok=True)
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_path = output_dir / f"{prefix}_{ts}.png"
+    if stem:
+        out_path = output_dir / f"{stem}.png"
+        i = 2
+        while out_path.exists():
+            out_path = output_dir / f"{stem}_{i}.png"
+            i += 1
+    else:
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        out_path = output_dir / f"{prefix}_{ts}.png"
     resp = requests.get(url, timeout=60)
     resp.raise_for_status()
     out_path.write_bytes(resp.content)
@@ -178,15 +190,23 @@ def cmd_text2img(args):
     print(f"   Prompt: {args.prompt[:120]}{'...' if len(args.prompt) > 120 else ''}")
 
     data = call_api(payload, api_key)
-    _handle_result(data, args.output)
+    _handle_result(data, args.output, stem=getattr(args, "name", None))
 
 
 def cmd_img2img(args):
     """图生图：上传现场照，保留房间结构换风格/加家具。"""
-    api_key = load_api_key()
-    model = resolve_model(args.model or "z-image")
-    image_size = IMAGE_SIZES.get(args.size, args.size or "1024x768")
+    _run_img_edit(args, default_model="z-image", prefix="redesign")
 
+
+def cmd_edit(args):
+    """指令式编辑：保留原图结构（柜体/门窗/地板），只改指定内容。"""
+    _run_img_edit(args, default_model="qwen-edit-2509", prefix="edit")
+
+
+def _run_img_edit(args, default_model: str, prefix: str):
+    api_key = load_api_key()
+    model = resolve_model(args.model or default_model)
+    image_size = IMAGE_SIZES.get(args.size, args.size or "1024x768")
     image_uri = encode_image(args.image)
 
     payload = {
@@ -198,15 +218,17 @@ def cmd_img2img(args):
     }
     if args.seed is not None:
         payload["seed"] = args.seed
+    if getattr(args, "negative_prompt", ""):
+        payload["negative_prompt"] = args.negative_prompt
 
-    print(f"🖼  图生图 | 模型 {model} | 参考图 {args.image} | 尺寸 {image_size}")
+    print(f"🖼  图像编辑 | 模型 {model} | 参考图 {args.image} | 尺寸 {image_size}")
     print(f"   Prompt: {args.prompt[:120]}{'...' if len(args.prompt) > 120 else ''}")
 
     data = call_api(payload, api_key)
-    _handle_result(data, args.output, prefix="redesign")
+    _handle_result(data, args.output, prefix=prefix, stem=getattr(args, "name", None))
 
 
-def _handle_result(data: dict, output: str, prefix: str = "render"):
+def _handle_result(data: dict, output: str, prefix: str = "render", stem: str | None = None):
     """处理 API 返回结果：下载图片到本地。"""
     images = data.get("images") or data.get("data") or []
     if not images:
@@ -217,18 +239,20 @@ def _handle_result(data: dict, output: str, prefix: str = "render"):
     out_dir = Path(output) if output else DEFAULT_OUTPUT_DIR
     for i, img in enumerate(images):
         url = img.get("url")
+        this_stem = f"{stem}_{i+1}" if stem and i else stem
         if not url:
             print(f"   (第 {i+1} 张图无 url，可能是 base64)")
             b64 = img.get("b64_json")
             if b64:
                 out_dir.mkdir(parents=True, exist_ok=True)
                 ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-                p = out_dir / f"{prefix}_{ts}_{i}.png"
+                name = f"{this_stem}.png" if this_stem else f"{prefix}_{ts}_{i}.png"
+                p = out_dir / name
                 p.write_bytes(base64.b64decode(b64))
                 print(f"💾 图片已保存: {p}")
             continue
         print(f"🌐 图片 URL 有效 1 小时，正在下载...")
-        download_image(url, out_dir, prefix=f"{prefix}_{i}" if i else prefix)
+        download_image(url, out_dir, prefix=f"{prefix}_{i}" if i else prefix, stem=this_stem)
 
 
 # ─── 入口 ────────────────────────────────────────────────────────────
@@ -247,6 +271,7 @@ def main():
     p_t2i.add_argument("--size", default="landscape", help="square/landscape/portrait/wide 或 WxH")
     p_t2i.add_argument("--seed", type=int, help="随机种子（复现用）")
     p_t2i.add_argument("--negative-prompt", default="", help="负面提示词")
+    p_t2i.add_argument("--name", default=None, help="输出文件名（不含扩展名）")
     p_t2i.add_argument("--output", help="输出目录")
     p_t2i.set_defaults(func=cmd_text2img)
 
@@ -256,8 +281,21 @@ def main():
     p_i2i.add_argument("--model", default="z-image", help="模型 key 或官方名")
     p_i2i.add_argument("--size", default="landscape", help="square/landscape/portrait/wide 或 WxH")
     p_i2i.add_argument("--seed", type=int, help="随机种子（复现用）")
+    p_i2i.add_argument("--negative-prompt", default="", help="负面提示词")
+    p_i2i.add_argument("--name", default=None, help="输出文件名（不含扩展名）")
     p_i2i.add_argument("--output", help="输出目录")
     p_i2i.set_defaults(func=cmd_img2img)
+
+    p_edit = sub.add_parser("edit", help="指令式编辑（保留结构，只改指定内容）")
+    p_edit.add_argument("--image", required=True, help="参考现场照路径")
+    p_edit.add_argument("--prompt", required=True, help="编辑指令")
+    p_edit.add_argument("--model", default="qwen-edit-2509", help="默认 qwen-edit-2509")
+    p_edit.add_argument("--size", default="landscape", help="square/landscape/portrait/wide 或 WxH")
+    p_edit.add_argument("--seed", type=int, help="随机种子（复现用）")
+    p_edit.add_argument("--negative-prompt", default="", help="负面提示词")
+    p_edit.add_argument("--name", default=None, help="输出文件名（不含扩展名）")
+    p_edit.add_argument("--output", help="输出目录")
+    p_edit.set_defaults(func=cmd_edit)
 
     p_m = sub.add_parser("models", help="列出可用模型")
     p_m.set_defaults(func=cmd_models)
