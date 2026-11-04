@@ -5,9 +5,30 @@ import requests
 import json
 import time
 import re
+import sys
 from pathlib import Path
 
-KEY = 'a8459f2dbcf06e8ba5d0fbd7be7a4163'
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from scripts.project_config import get  # noqa: E402
+
+
+def _amap_key() -> str:
+    """高德 Key 只从 config.local.json / 环境变量读取，不再硬编码。"""
+    key = (get("amap_key") or "").strip()
+    if not key:
+        raise SystemExit(
+            "缺少高德地图 Key。\n"
+            "  1) 申请：https://console.amap.com/dev/key/app（Web 服务类型）\n"
+            "  2) 写入 config.local.json 的 amap_key，或设环境变量 OFFICE_AMAP_KEY\n"
+            "  3) 参考 config.example.json"
+        )
+    return key
+
+
+KEY = _amap_key()
 CITY = '龙岩市'
 OUTPUT_DIR = Path(__file__).parent.parent / 'output' / 'office'
 

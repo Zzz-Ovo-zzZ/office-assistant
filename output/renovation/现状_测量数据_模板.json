@@ -1,0 +1,55 @@
+{
+  "_说明": "把本文件复制为 现状_测量数据.json 后填写实测值。单位 mm；数字填 0 表示尚未测量。坐标原点=各房内墙西北角，x 向东、y 向南。",
+  "project": "婚房翻新_2026",
+  "unit": "mm",
+  "rooms": [
+    {
+      "id": "master",
+      "name": "主卧",
+      "inner": { "w": 0, "d": 0, "h": 2800 },
+      "openings": [
+        { "type": "door", "wall": "south", "offset": 0, "width": 900, "swing": "in-left" },
+        { "type": "window", "wall": "north", "offset": 0, "width": 0, "sill": 900, "height": 1500 }
+      ],
+      "cabinets": [
+        { "name": "衣柜", "x": 0, "y": 0, "w": 0, "depth": 600, "h": 2400, "color": "暖白", "keep": true, "role": "wardrobe", "door": "平开" }
+      ],
+      "tables": [
+        { "name": "书桌", "x": 0, "y": 0, "w": 0, "depth": 600, "h": 750, "keep": "optional", "role": "desk" }
+      ],
+      "fixed": [],
+      "proposed": [],
+      "lighting": []
+    },
+    {
+      "id": "dining",
+      "name": "餐厅",
+      "inner": { "w": 0, "d": 0, "h": 2800 },
+      "openings": [],
+      "cabinets": [
+        { "name": "餐边柜", "x": 0, "y": 0, "w": 0, "depth": 400, "h": 900, "color": "原木", "keep": true, "role": "cabinet" }
+      ],
+      "tables": [
+        { "name": "餐桌", "x": 0, "y": 0, "w": 1400, "depth": 800, "h": 750, "keep": "optional", "role": "dining" }
+      ],
+      "fixed": [],
+      "proposed": [],
+      "lighting": []
+    },
+    {
+      "id": "study",
+      "name": "书房",
+      "inner": { "w": 0, "d": 0, "h": 2800 },
+      "openings": [],
+      "cabinets": [
+        { "name": "书柜", "x": 0, "y": 0, "w": 0, "depth": 350, "h": 2100, "color": "胡桃", "keep": true, "role": "cabinet" }
+      ],
+      "tables": [
+        { "name": "书桌", "x": 0, "y": 0, "w": 0, "depth": 600, "h": 750, "keep": "optional", "role": "desk" }
+      ],
+      "fixed": [],
+      "proposed": [],
+      "lighting": []
+    }
+  ]
+}

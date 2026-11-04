@@ -11,37 +11,64 @@
 | 模块 | 说明 |
 |------|------|
 | 办公自动化 | 日常工作流程自动化脚本 |
-| 生活规划 | 婚嫁择日、事件筹备、预算管理、行程安排 |
+| 生活规划 | 婚嫁择日、事件筹备、室内设计、预算管理、行程安排 |
 | 知识管理 | 备忘录、决策记录、经验沉淀 |
 
 ## 目录结构
 
 ```
 办公助手/
-├── scripts/                    # 可执行脚本
-│   ├── wedding/                # 婚嫁择日脚本
+├── CLAUDE.md / AGENTS.md       # 规则书（本文件）+ 多 harness 入口
+├── config.example.json         # 本机配置模板（复制为 config.local.json，不入库）
+├── requirements.txt            # 依赖清单
+├── scripts/
+│   ├── bootstrap.py            # 一键初始化 / 自检（换电脑先跑它）
+│   ├── project_config.py       # 路径与密钥的唯一出口
+│   ├── wedding/                # 婚嫁择日（lunar-python + cnlunar 双源）
 │   ├── fitness/                # 健身饮食助手
 │   ├── finance/                # 理财助手 (收益计算/记账/贷款)
-│   ├── utils/                  # 通用工具 (md转html/pdf等)
-│   └── notepad_app/            # 记事本应用
+│   ├── kaobian/                # 考编工具（岗位监控/时政/进度/错题）
+│   ├── asset_reconcile/        # 置业财务累欠 vs 合同对账（6 步）
+│   ├── receivable_compare/     # 系统应收 vs 整理应收对比
+│   ├── focus/                  # 置顶番茄钟
+│   ├── notepad_app/            # PyQt6 悬浮记事本
+│   └── utils/                  # md 转 html/pdf、WPS 桥接、KK 采集
 ├── output/                     # 输出文件（按领域分目录）
 │   ├── wedding/                # 婚嫁报告 (八字合婚/订婚择日/综合规划)
 │   ├── fitness/                # 健身输出 (评估/计划/日志)
 │   ├── finance/                # 理财输出 (对比报告/计划/台账)
+│   ├── kaobian/                # 考编输出 (备考方案/岗位分析)
+│   ├── office/                 # 资产办公输出 (片区划分/地图/编号规则)
+│   ├── interior/               # 室内设计输出 (效果图/方案/购物清单)
 │   └── README.md               # 输出规范说明
 ├── data/                       # 静态数据资源
 │   ├── exercises/              # 锻炼动作库
 │   └── nutrition/              # 食物成分数据
 ├── knowledge/                  # 知识库文档
-│   ├── fitness/                # 健身指南
-│   ├── finance/                # 理财指南
-│   └── wedding/                # 婚嫁知识
-├── temp/                       # 临时文件（用完即删）
+│   ├── fitness/ finance/ kaobian/ wedding/ interior/
+├── girlfriend/                 # 曾周 · 万龄康养工作专区
+├── temp/                       # 临时文件（用完即删，gitignore）
 ├── memory/                     # 跨会话记忆
 └── README.md
 ```
 
 > 输出文件须遵循命名规范：`{主题}_{内容描述}_{版本/日期}.{扩展名}`，详见 `output/README.md`
+
+## 运行环境与可移植性
+
+- Python 3.10+（推荐 3.12）；依赖见 `requirements.txt`。
+- 换电脑三步：`pip install -r requirements.txt` → `python scripts/bootstrap.py --init-config` → `python scripts/bootstrap.py` 自检。
+- **机器相关路径与密钥只放 `config.local.json`**（已 gitignore），代码里不得再出现盘符或明文 Key。
+- 业务数据路径按名字取：`from scripts.project_config import path_of`；文件缺失时脚本给出中文提示，而不是 traceback。
+- 环境变量可覆盖：`OFFICE_SYNOLOGY_ROOT`、`OFFICE_AMAP_KEY`、`OFFICE_PATH_BILL` 等。
+- 每台机器一次性动作：装依赖 → 生成配置 → 填 Key（高德/硅基流动）→ 需要 COM 回填的装 WPS 或 Excel。
+
+## 与 AI 工具的关系
+
+- 本文件是唯一事实来源，Claude Code 自动读取。
+- 其他 harness（DeepSeek Harness / Cursor / Copilot）先读 `AGENTS.md` 的能力路由表。
+- `.claude/skills/` 里的内容在没有 skill 机制的 harness 中**按文件直接读取**，不要假设能斜杠触发。
+
 
 ## Git 版本
 
@@ -51,7 +78,9 @@
 
 ## 婚嫁择日规则库
 
-### 必须避开的日期（17类）
+### 必须避开的日期（15类）
+
+> 原文档标题写「17 类」，实际只列 15 类，此处按实际条目校正；若要补齐，请先确认新增两类再改标题。
 
 | 类别 | 说明 |
 |------|------|
@@ -168,7 +197,7 @@ python scripts/fitness/cli.py plan      # 生成训练计划
 
 - 起步无静态数据，利率/产品参数由用户输入；记账流水为 `output/finance/ledger/*.csv`（Excel/WPS 可编辑）。
 - 知识库 `knowledge/finance/`：`guide.md`（保本/基础主线）+ 10 个增值类专题（dca/fire/allocation/withdraw/math/funds/score/psychology/opportunity-cost）+ `rates-2026.md`（2026 最新利率，含来源）。
-- 本地化 skill `.claude/skills/wealth-shortcut/`：可用 `/wealth-shortcut`、`/理财` 触发全谱系理财顾问。
+- 本地化 skill `.claude/skills/wealth-shortcut/`：Claude Code 下可用 `/wealth-shortcut`、`/理财` 触发；其他 harness 直接读该目录的 `SKILL.md`（见 `AGENTS.md` 路由表）。
 
 ### 使用示例
 
@@ -202,3 +231,49 @@ python scripts/finance/cli.py score 1000000 30 200000     # 理财指数
 - 《存款保险条例》(50 万本息保障)
 - 资管新规 (银行理财净值化、不保本)
 - 2026 最新利率数据见 `knowledge/finance/rates-2026.md`
+
+## 装修设计（婚房翻新项目）
+
+- 项目目录：`output/renovation/`（与 `output/wedding` 同级），详见其 `README.md`。
+- 硬约束：既有成品柜**不可拆**，桌子可移位/替换；只做墙色、软装、灯具、局部家具，不动水电与门窗洞。
+- 配色主系统：**米杏 + 灰 + 黑 + 原木**；灰蓝仅作 ≤10% 点缀。三条支路（柜体偏白/偏暖木/偏深）见 `knowledge/interior/renovation-constraints.md`。
+- 平面图工具：`scripts/renovation/floorplan.py` — `draw`（SVG/HTML/PNG/PDF + 尺寸总表）、`check`（动线自检，硬违规退出码 1）、`table`、`selftest`。
+- 批量出图：`scripts/renovation/render_batch.py`；生图优先 `render.py edit`（`Qwen-Image-Edit-2509`，保留柜体/门窗/地板结构），失败降级 `img2img`（Z-Image）。
+- 数据源：`output/renovation/现状_测量数据.json`，单位 mm，坐标原点 = 各房内墙西北角（x 向东、y 向南）。
+
+## 室内软装设计
+
+### 能力范围
+
+| 能力 | 说明 |
+|------|------|
+| 读图分析 | 读房间照片/户型图，识别尺寸/门窗/硬装/现有家具，输出 12 项分析 |
+| 专业设计 | 色彩(孟塞尔+60-30-10)、灯光(四层布光+色温)、空间(动线+家具间隙)、风格(6大风格) |
+| 效果图生成 | 硅基流动 API（Z-Image / Qwen-Image / **Qwen-Image-Edit**），支持文生图、图生图、指令式编辑（保留结构改局部） |
+| 家具选购 | 中国家具国标尺寸 + 板材材质辨别 + 选购避坑 |
+
+### 工具模块
+
+| 位置 | 功能 |
+|------|------|
+| `.claude/skills/interior-design/` | 室内设计 skill (`SKILL.md` 方法论 + `scripts/render.py` 生图脚本) |
+| `knowledge/interior/` | 知识库 (design-guide/color-science/lighting-design/space-planning/style-guide/furniture-spec/shopping-guide) |
+| `output/interior/` | 输出 (renderings 效果图 / plans 方案 / shopping 购物清单) |
+
+### 生图脚本用法
+
+```bash
+python .claude/skills/interior-design/scripts/render.py text2img --prompt "..." --model z-image
+python .claude/skills/interior-design/scripts/render.py img2img  --image 房间.jpg --prompt "..." --model z-image
+python .claude/skills/interior-design/scripts/render.py edit     --image 房间.jpg --prompt "保留柜体门窗，只换墙色与软装" --model qwen-edit-2509
+python .claude/skills/interior-design/scripts/render.py models   # 列出可用模型
+```
+
+> 依赖 `pip install requests`；API key 免费注册 cloud.siliconflow.cn，写入 skill 目录 `.env` 文件。
+
+### 参考来源
+
+- interior-vibing (GitHub) — 生图流程方法论 (房间分析/prompt/deck)
+- interior-design-expert (GitHub, Apache-2.0) — 色彩/灯光/空间/风格专业内核
+- zhuangxiu-skills (GitHub, 西安装修课堂) — 中文家具软装选购实战
+- GB/T 3326/3327/3328 + QB/T 1952.1 — 中国家具国标尺寸

@@ -22,9 +22,13 @@ import json
 # 确保可以导入 fitness 模块
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+from scripts.console import force_utf8
+
+force_utf8()
+
 from scripts.fitness.engine import (
     FitnessEngine, BodyProfile, Gender, ActivityLevel,
-    Goal, MacroPreset, quick_assess, print as _,
+    Goal, MacroPreset, quick_assess,
 )
 from scripts.fitness.training import (
     ProgramGenerator, TrainingGoal, TrainingLevel,
