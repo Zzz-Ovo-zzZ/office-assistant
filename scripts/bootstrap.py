@@ -77,6 +77,53 @@ def report_deps() -> bool:
     return not missing_core
 
 
+def check_business_paths() -> tuple[int, int, list[str]]:
+    """检查 config 里登记的业务数据路径是否存在。
+
+    换机最容易漏的一环：依赖装好了、引擎冒烟也过了，但 synology_root 还指着
+    旧电脑的盘符，资产对账/应收对比会直接找不到文件。这里提前暴露，而不是等
+    用户跑到那一步才报错。
+    """
+    print("\n-- 业务数据 --")
+    try:
+        from scripts.project_config import CONFIG, CONFIG_LOCAL, path_of
+    except Exception as exc:  # 配置模块本身坏了也给提示，不吞异常
+        print(f"{WARN} 配置模块导入失败：{exc}")
+        return 0, 0, []
+
+    root = str(CONFIG.get("synology_root", ""))
+    root_ok = Path(root).exists() if root else False
+    flag = OK if root_ok else WARN
+    note = "" if root_ok else "  ← 该目录在本机不存在，请改 config.local.json"
+    print(f"{flag} synology_root = {root}{note}")
+
+    ok = total = 0
+    missing: list[str] = []
+    for name in CONFIG.get("paths", {}):
+        total += 1
+        try:
+            p = path_of(name)
+        except KeyError:
+            missing.append(name)
+            print(f"{WARN} {name:<14} 配置里缺这一项")
+            continue
+        if p.exists():
+            ok += 1
+            print(f"{OK} {name:<14} {p.name}")
+        else:
+            missing.append(name)
+            print(f"{WARN} {name:<14} 不存在：{p}")
+
+    if total == 0:
+        print(f"{WARN} 配置里没有 paths.*，业务脚本不可用")
+    elif missing:
+        print(f"\n  缺 {len(missing)}/{total} 项：资产对账、应收对比会不可用。")
+        print(f"  处理：改 {CONFIG_LOCAL.name} 的 synology_root / paths.*，或设 OFFICE_PATH_<名字> 临时覆盖。")
+    else:
+        print(f"\n  {total} 项业务路径全部命中 ✅")
+    return ok, total, missing
+
+
 def init_config() -> None:
     src = ROOT / "config.example.json"
     dst = ROOT / "config.local.json"
@@ -161,11 +208,14 @@ def main() -> int:
 
     deps_ok = report_deps()
     make_dirs()
+    biz_ok, biz_total, missing = check_business_paths()
     smoke_ok = smoke_test()
 
     print("\n" + "=" * 56)
     if py_ok and deps_ok and smoke_ok:
         print("环境就绪 ✅  可开始使用")
+        if biz_total and missing:
+            print(f"注意：业务数据缺 {len(missing)}/{biz_total} 项（不影响通用工具，资产/应收脚本需先补数据）")
         print("常用入口：python scripts/bootstrap.py --init-config（首次）")
         return 0
     print("环境未就绪，请按上面的提示补齐 ⚠️")
