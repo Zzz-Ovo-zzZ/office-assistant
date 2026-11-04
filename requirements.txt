@@ -1,4 +1,4 @@
-# 运行环境依赖（Python 3.10+，推荐 3.12）
+﻿# 运行环境依赖（Python 3.10+，推荐 3.12）
 # 安装：python -m pip install -r requirements.txt
 # 仅需部分能力时，可只装对应的包（见每节注释）。
 
