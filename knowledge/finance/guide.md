@@ -1,6 +1,6 @@
 # 理财完全指南
 
-> 本文档为 Claude 提供个人理财领域的系统知识，使其能给出科学、可落地的建议。
+> 本文档为 AI 助理提供个人理财领域的系统知识，使其能给出科学、可落地的建议。
 > 覆盖：复利与货币时间价值、储蓄类产品对比、贷款、记账预算、避坑。
 > 增值类专题（定投/FIRE/资产配置/心理等）见同目录 dca.md / fire.md / allocation.md / withdraw.md / math.md / funds.md / score.md / psychology.md / opportunity-cost.md；2026 最新利率见 rates-2026.md。
 

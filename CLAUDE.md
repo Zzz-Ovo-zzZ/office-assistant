@@ -18,32 +18,57 @@
 
 ```
 办公助手/
-├── scripts/                    # 可执行脚本
-│   ├── wedding/                # 婚嫁择日脚本
+├── CLAUDE.md / AGENTS.md       # 规则书（本文件）+ 多 harness 入口
+├── config.example.json         # 本机配置模板（复制为 config.local.json，不入库）
+├── requirements.txt            # 依赖清单
+├── scripts/
+│   ├── bootstrap.py            # 一键初始化 / 自检（换电脑先跑它）
+│   ├── project_config.py       # 路径与密钥的唯一出口
+│   ├── wedding/                # 婚嫁择日（lunar-python + cnlunar 双源）
 │   ├── fitness/                # 健身饮食助手
 │   ├── finance/                # 理财助手 (收益计算/记账/贷款)
-│   ├── utils/                  # 通用工具 (md转html/pdf等)
-│   └── notepad_app/            # 记事本应用
+│   ├── kaobian/                # 考编工具（岗位监控/时政/进度/错题）
+│   ├── asset_reconcile/        # 置业财务累欠 vs 合同对账（6 步）
+│   ├── receivable_compare/     # 系统应收 vs 整理应收对比
+│   ├── focus/                  # 置顶番茄钟
+│   ├── notepad_app/            # PyQt6 悬浮记事本
+│   └── utils/                  # md 转 html/pdf、WPS 桥接、KK 采集
 ├── output/                     # 输出文件（按领域分目录）
 │   ├── wedding/                # 婚嫁报告 (八字合婚/订婚择日/综合规划)
 │   ├── fitness/                # 健身输出 (评估/计划/日志)
 │   ├── finance/                # 理财输出 (对比报告/计划/台账)
+│   ├── kaobian/                # 考编输出 (备考方案/岗位分析)
+│   ├── office/                 # 资产办公输出 (片区划分/地图/编号规则)
 │   ├── interior/               # 室内设计输出 (效果图/方案/购物清单)
 │   └── README.md               # 输出规范说明
 ├── data/                       # 静态数据资源
 │   ├── exercises/              # 锻炼动作库
 │   └── nutrition/              # 食物成分数据
 ├── knowledge/                  # 知识库文档
-│   ├── fitness/                # 健身指南
-│   ├── finance/                # 理财指南
-│   ├── interior/               # 室内设计 (色彩/灯光/空间/风格/家具)
-│   └── wedding/                # 婚嫁知识
-├── temp/                       # 临时文件（用完即删）
+│   ├── fitness/ finance/ kaobian/ wedding/ interior/
+├── girlfriend/                 # 曾周 · 万龄康养工作专区
+├── temp/                       # 临时文件（用完即删，gitignore）
 ├── memory/                     # 跨会话记忆
 └── README.md
 ```
 
 > 输出文件须遵循命名规范：`{主题}_{内容描述}_{版本/日期}.{扩展名}`，详见 `output/README.md`
+
+## 运行环境与可移植性
+
+- Python 3.10+（推荐 3.12）；依赖见 `requirements.txt`。
+- 换电脑三步：`pip install -r requirements.txt` → `python scripts/bootstrap.py --init-config` → `python scripts/bootstrap.py` 自检。
+- **机器相关路径与密钥只放 `config.local.json`**（已 gitignore），代码里不得再出现盘符或明文 Key。
+- 业务数据路径按名字取：`from scripts.project_config import path_of`；文件缺失时脚本给出中文提示，而不是 traceback。
+- 环境变量可覆盖：`OFFICE_SYNOLOGY_ROOT`、`OFFICE_AMAP_KEY`、`OFFICE_PATH_BILL` 等。
+- 每台机器一次性动作：装依赖 → 生成配置 → 填 Key（高德/硅基流动）→ 需要 COM 回填的装 WPS 或 Excel。
+
+## 与 AI 工具的关系
+
+- 本文件是唯一事实来源，Claude Code 自动读取。
+- 其他 harness（DeepSeek Harness / Cursor / Copilot）先读 `AGENTS.md` 的能力路由表。
+- `.claude/skills/` 里的内容在没有 skill 机制的 harness 中**按文件直接读取**，不要假设能斜杠触发。
+
 
 ## Git 版本
 
@@ -53,7 +78,9 @@
 
 ## 婚嫁择日规则库
 
-### 必须避开的日期（17类）
+### 必须避开的日期（15类）
+
+> 原文档标题写「17 类」，实际只列 15 类，此处按实际条目校正；若要补齐，请先确认新增两类再改标题。
 
 | 类别 | 说明 |
 |------|------|
@@ -170,7 +197,7 @@ python scripts/fitness/cli.py plan      # 生成训练计划
 
 - 起步无静态数据，利率/产品参数由用户输入；记账流水为 `output/finance/ledger/*.csv`（Excel/WPS 可编辑）。
 - 知识库 `knowledge/finance/`：`guide.md`（保本/基础主线）+ 10 个增值类专题（dca/fire/allocation/withdraw/math/funds/score/psychology/opportunity-cost）+ `rates-2026.md`（2026 最新利率，含来源）。
-- 本地化 skill `.claude/skills/wealth-shortcut/`：可用 `/wealth-shortcut`、`/理财` 触发全谱系理财顾问。
+- 本地化 skill `.claude/skills/wealth-shortcut/`：Claude Code 下可用 `/wealth-shortcut`、`/理财` 触发；其他 harness 直接读该目录的 `SKILL.md`（见 `AGENTS.md` 路由表）。
 
 ### 使用示例
 
