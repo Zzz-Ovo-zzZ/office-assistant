@@ -9,6 +9,12 @@ from pathlib import Path
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from scripts.project_config import path_of, require  # noqa: E402
+
 # ============================================================
 # 片区划分方案 - 核心原则：每个片区只有一位管理员
 # ============================================================
@@ -176,7 +182,7 @@ ADMIN_COLORS = {
 
 
 def main():
-    INPUT = r'd:\SynologyDrive\0资产管理录入文件\入场实施\资产数据\惠和资产片区划分规划表_2026.7.15.xlsx'
+    INPUT = str(require(path_of('huihe_plan'), '惠和片区划分规划表'))
     OUTPUT = str(Path(__file__).parent.parent / 'output' / 'office' / '惠和资产片区划分结果_v2_2026.7.15.xlsx')
 
     wb = openpyxl.load_workbook(INPUT, data_only=True)

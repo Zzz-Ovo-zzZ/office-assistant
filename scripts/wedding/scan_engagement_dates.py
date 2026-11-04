@@ -524,8 +524,11 @@ if __name__ == '__main__':
     # 生成详细报告
     report = main()
 
-    # 保存
-    report_path = r'D:\Code Files\Cursor\办公助手\output\订婚吉日扫描_lunar-python_2026年9-12月_20260610.md'
+    # 保存（相对项目根目录，换电脑无需改路径）
+    from pathlib import Path
+    report_path = (Path(__file__).resolve().parents[2] / 'output' / 'wedding'
+                   / '订婚择日' / '订婚吉日扫描_lunar-python_2026年9-12月.md')
+    report_path.parent.mkdir(parents=True, exist_ok=True)
     with open(report_path, 'w', encoding='utf-8') as f:
         f.write(report)
     print(f'详细报告已保存: {report_path}')

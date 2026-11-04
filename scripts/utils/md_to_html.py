@@ -1,11 +1,23 @@
-"""MD → HTML 浏览器精确渲染"""
+"""MD → HTML 浏览器精确渲染
+
+用法:
+    python scripts/utils/md_to_html.py [输入.md] [输出.html]
+不传参数时，默认渲染 output/wedding/八字合婚/曾周x成林_八字合婚分析报告.md
+"""
 import markdown
 import os
 import re
+import sys
+from pathlib import Path
 
-BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-INPUT = os.path.join(BASE, 'output', '八字合婚分析报告_20260608.md')
-OUTPUT = os.path.join(BASE, 'output', '八字合婚分析报告_20260608.html')
+BASE = Path(__file__).resolve().parent.parent.parent
+DEFAULT_INPUT = BASE / 'output' / 'wedding' / '八字合婚' / '曾周x成林_八字合婚分析报告.md'
+
+INPUT = sys.argv[1] if len(sys.argv) > 1 else str(DEFAULT_INPUT)
+OUTPUT = sys.argv[2] if len(sys.argv) > 2 else str(Path(INPUT).with_suffix('.html'))
+
+if not os.path.exists(INPUT):
+    raise SystemExit(f'找不到输入文件：{INPUT}\n用法：python scripts/utils/md_to_html.py <输入.md> [输出.html]')
 
 with open(INPUT, 'r', encoding='utf-8') as f:
     md = f.read()

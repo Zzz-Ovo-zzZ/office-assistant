@@ -344,8 +344,10 @@ if __name__ == '__main__':
     report = main()
     print(report)
 
-    # 保存
-    report_path = r'D:\Code Files\Cursor\办公助手\output\候选日期分析_9月10月_20260610.md'
+    # 保存（相对项目根目录，换电脑无需改路径）
+    from pathlib import Path
+    report_path = Path(__file__).resolve().parent.parent / 'output' / '候选日期分析_9月10月_20260610.md'
+    report_path.parent.mkdir(parents=True, exist_ok=True)
     with open(report_path, 'w', encoding='utf-8') as f:
         f.write(report)
     print(f'\n报告已保存: {report_path}')

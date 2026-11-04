@@ -1,12 +1,29 @@
-"""Markdown → HTML → PDF（使用系统Edge浏览器打印）"""
+"""Markdown → HTML → PDF（使用系统 Edge 浏览器打印）
+
+用法:
+    python scripts/utils/md_to_pdf.py [输入.md] [输出.pdf]
+不传参数时，默认处理 output/wedding/八字合婚/曾周x成林_八字合婚分析报告.md
+"""
 import markdown
 import os
+import shutil
 import subprocess
+import sys
+from pathlib import Path
 
-INPUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                      'output', '八字合婚分析报告_20260608.md')
+BASE = Path(__file__).resolve().parent.parent.parent
+DEFAULT_INPUT = BASE / 'output' / 'wedding' / '八字合婚' / '曾周x成林_八字合婚分析报告.md'
+
+INPUT = sys.argv[1] if len(sys.argv) > 1 else str(DEFAULT_INPUT)
 OUTPUT_HTML = INPUT.replace('.md', '_print.html')
-OUTPUT_PDF = INPUT.replace('.md', '.pdf')
+OUTPUT_PDF = sys.argv[2] if len(sys.argv) > 2 else INPUT.replace('.md', '.pdf')
+
+if not os.path.exists(INPUT):
+    raise SystemExit(f'找不到输入文件：{INPUT}\n用法：python scripts/utils/md_to_pdf.py <输入.md> [输出.pdf]')
+
+# Edge 需要绝对路径，否则 file:/// 会解析错
+OUTPUT_HTML = os.path.abspath(OUTPUT_HTML)
+OUTPUT_PDF = os.path.abspath(OUTPUT_PDF)
 
 with open(INPUT, 'r', encoding='utf-8') as f:
     md_content = f.read()
@@ -54,14 +71,11 @@ print(f'HTML saved: {OUTPUT_HTML}')
 
 # 使用 Edge 打印为 PDF
 edge_paths = [
+    shutil.which("msedge"),
     r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
     r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
 ]
-edge_exe = None
-for p in edge_paths:
-    if os.path.exists(p):
-        edge_exe = p
-        break
+edge_exe = next((p for p in edge_paths if p and os.path.exists(p)), None)
 
 if edge_exe:
     cmd = [
