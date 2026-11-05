@@ -49,11 +49,12 @@ def load_tasks(path: Path) -> dict:
 def run_one(task: dict) -> tuple[bool, str]:
     """执行单个任务；成功返回 (True, 文件路径)。"""
     mode = task.get("mode", "edit")
-    image = Path(task["image"])
-    if not image.is_absolute():
-        image = ROOT / image
-    if not image.exists():
-        return False, f"参考图不存在：{image}"
+    image = Path(task["image"]) if task.get("image") else None
+    if image is not None:
+        if not image.is_absolute():
+            image = ROOT / image
+        if not image.exists():
+            return False, f"参考图不存在：{image}"
 
     out_dir = Path(task.get("output") or "output/renovation/效果图")
     if not out_dir.is_absolute():
@@ -65,12 +66,13 @@ def run_one(task: dict) -> tuple[bool, str]:
         return True, str(expected)
 
     cmd = [sys.executable, str(RENDER), mode,
-           "--image", str(image),
            "--prompt", task["prompt"],
            "--size", task.get("size", "landscape"),
            "--model", task.get("model", "qwen-edit-2509" if mode == "edit" else "z-image"),
            "--name", task["id"],
            "--output", str(out_dir)]
+    if mode != "text2img":
+        cmd[3:3] = ["--image", str(image)]
     if task.get("seed") is not None:
         cmd += ["--seed", str(task["seed"])]
     if task.get("negative_prompt"):

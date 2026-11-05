@@ -23,7 +23,9 @@
         { "name": "主卧厕所", "x": 0, "y": 3800, "w": 1600, "depth": 1200, "h": 2400 }
       ],
       "proposed": [
-        { "name": "床1.8m·黑皮靠背", "x": 0, "y": 900, "w": 2000, "depth": 1800, "h": 1100, "role": "bed" }
+        { "name": "床1.8m·黑皮靠背", "x": 0, "y": 1000, "w": 2000, "depth": 1800, "h": 1100, "role": "bed" },
+        { "name": "床头柜·北", "x": 0, "y": 560, "w": 440, "depth": 400, "h": 520, "role": "other", "ignore_clearance": true },
+        { "name": "床头柜·南", "x": 0, "y": 2840, "w": 440, "depth": 440, "h": 520, "role": "other", "ignore_clearance": true }
       ],
       "lighting": [
         { "type": "wall", "x": 150, "y": 1000, "label": "床头灯 2700K" },

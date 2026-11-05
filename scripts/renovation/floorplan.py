@@ -114,6 +114,8 @@ def clearance(room: dict, item: dict, side: str, items: list[dict] | None = None
         for o in items:
             if o is item:
                 continue
+            if o.get("ignore_clearance"):   # 床头柜等贴身小件不参与净空计算
+                continue
             if o.get("x") == x and o.get("y") == y and o.get("name") == item.get("name") and o.get("kind") == item.get("kind"):
                 continue
             yield o
@@ -299,6 +301,10 @@ def draw_room(room: dict, s: int, layer: str = "plan") -> str:
                        f'fill="#2F2F2C" font-family="{FONT}" font-weight="600">{label}</text>')
             out.append(f'<text x="{x + w/2}" y="{y + d/2 + s*3.4}" font-size="{fs2}" text-anchor="middle" '
                        f'fill="#4A4A46" font-family="{FONT}">{dims}</text>')
+        elif w / s <= 22 and d / s <= 16:
+            # 小件（床头柜/边几）：只写名称，尺寸看尺寸总表，避免竖向文字压墙
+            out.append(f'<text x="{x + w + s*1.2}" y="{y + d/2 + s*0.7}" font-size="{2.1*s}" '
+                       f'fill="#4A4A46" font-family="{FONT}">{label}</text>')
         elif w / s <= 22 and d / s > 10:
             # 窄而高（如贴墙衣柜）：文字竖排放在块内，避免被墙线压住
             cx, cy = x + w / 2, y + d / 2
