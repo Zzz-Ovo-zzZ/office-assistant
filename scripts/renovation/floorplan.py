@@ -230,12 +230,97 @@ def _dim_v(y1: float, y2: float, x: float, text: str, s: int, color: str = "#444
     )
 
 
+def _chain(segs, s, kind, pos, color: str = "#444") -> str:
+    """分段尺寸链（门窗定位），窄段自动省略文字。"""
+    parts = []
+    for a, b in segs:
+        if (b - a) / s < 4:
+            continue
+        label = f"{int(b - a)}" if (b - a) / s >= 9 else ""
+        parts.append(_dim_h(a, b, pos, label, s, color) if kind == "h"
+                     else _dim_v(a, b, pos, label, s, color))
+    return "".join(parts)
+
+
+def _segments(total: float, openings: list[dict], wall: str) -> list[tuple[float, float]]:
+    """沿某面墙按洞口切分，返回分段列表。"""
+    cuts = {0.0, float(total)}
+    for op in openings:
+        if op.get("wall") != wall:
+            continue
+        off, w = float(op.get("offset", 0)), float(op.get("width", 0))
+        cuts.add(max(0.0, off))
+        cuts.add(min(float(total), off + w))
+    xs = sorted(cuts)
+    return [(xs[i], xs[i + 1]) for i in range(len(xs) - 1) if xs[i + 1] - xs[i] > 1]
+
+
+def _axis_v(x: float, y0: float, y1: float, tag: str, s: int) -> str:
+    r = s * 1.5
+    return (f'<line x1="{x}" y1="{y0}" x2="{x}" y2="{y1}" stroke="#8FA3B8" stroke-width="{s*0.1}" '
+            f'stroke-dasharray="{s*28},{s*10},{s*3},{s*10}"/>'
+            f'<circle cx="{x}" cy="{y0}" r="{r}" fill="#FFF" stroke="#8FA3B8" stroke-width="{s*0.14}"/>'
+            f'<text x="{x}" y="{y0 + s*0.7}" font-size="{2.3*s}" text-anchor="middle" fill="#4A5F75" font-family="{FONT}">{tag}</text>')
+
+
+def _axis_h(y: float, x0: float, x1: float, tag: str, s: int) -> str:
+    r = s * 1.5
+    return (f'<line x1="{x0}" y1="{y}" x2="{x1}" y2="{y}" stroke="#8FA3B8" stroke-width="{s*0.1}" '
+            f'stroke-dasharray="{s*28},{s*10},{s*3},{s*10}"/>'
+            f'<circle cx="{x0}" cy="{y}" r="{r}" fill="#FFF" stroke="#8FA3B8" stroke-width="{s*0.14}"/>'
+            f'<text x="{x0}" y="{y + s*0.7}" font-size="{2.3*s}" text-anchor="middle" fill="#4A5F75" font-family="{FONT}">{tag}</text>')
+
+
+def _opening_tags(openings: list[dict]) -> list[tuple[str, dict]]:
+    """门 M1..、窗 C1.. 编号。"""
+    out, md, mc = [], 0, 0
+    for op in openings:
+        if op.get("type") == "door":
+            md += 1
+            out.append((f"M{md}", op))
+        else:
+            mc += 1
+            out.append((f"C{mc}", op))
+    return out
+
+
+def _title_block(project: str, room_name: str, s: int, date: str) -> str:
+    """右下角标题栏（纸张坐标 mm）。"""
+    x0, y0, w, h = 248.0, 248.0, 162.0, 42.0
+    rows = [
+        (f"项目　{project}", 3.4),
+        (f"图名　{room_name} 平面布置图", 3.4),
+        (f"比例　1:{s}　　单位　mm", 2.9),
+        (f"日期　{date}　　制图　办公助手", 2.9),
+    ]
+    out = [f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" fill="#FFF" stroke="#3A3A38" stroke-width="0.35"/>']
+    y = y0 + 8
+    for text, fs in rows:
+        out.append(f'<text x="{x0 + 4}" y="{y}" font-size="{fs}" fill="#2F2F2C" font-family="{FONT}">{text}</text>')
+        y += 9.5
+        out.append(f'<line x1="{x0}" y1="{y - 6}" x2="{x0 + w}" y2="{y - 6}" stroke="#D8D2C6" stroke-width="0.2"/>')
+    return "".join(out)
+
+
+def _scale_bar(s: int) -> str:
+    """左下角比例尺（纸张坐标 mm）。"""
+    x, y = 14.0, 281.0
+    seg = 1000 / s
+    out = []
+    for i in range(3):
+        fill = "#3A3A38" if i % 2 == 0 else "#FFF"
+        out.append(f'<rect x="{x + i*seg}" y="{y}" width="{seg}" height="2" fill="{fill}" stroke="#3A3A38" stroke-width="0.2"/>')
+        out.append(f'<text x="{x + i*seg}" y="{y - 1.5}" font-size="2.6" text-anchor="middle" fill="#3A3A38" font-family="{FONT}">{i}</text>')
+    out.append(f'<text x="{x + 3*seg}" y="{y - 1.5}" font-size="2.6" text-anchor="middle" fill="#3A3A38" font-family="{FONT}">3m</text>')
+    return "".join(out)
+
+
 def draw_room(room: dict, s: int, layer: str = "plan") -> str:
     W, D = room["inner"]["w"], room["inner"]["d"]
     M = MARGIN
     # 纸张尺寸按 A3 横向 420×297mm；图面用「模型 mm」绘制，外层 g 统一缩放到 1:s 并按内容包围盒居中
-    L, R = -M * 0.62, W + M * 0.62
-    T, B = -M * 0.62, D + M * 1.05
+    L, R = -M * 1.35, W + M * 1.35
+    T, B = -M * 1.35, D + M * 1.05
     cw, ch = (R - L) / s, (B - T) / s
     tx = (420 - cw) / 2 - L / s
     ty = (297 - ch) / 2 - T / s
@@ -317,11 +402,40 @@ def draw_room(room: dict, s: int, layer: str = "plan") -> str:
         else:
             out.append(f'<text x="{x + w + s*2}" y="{y + d/2}" font-size="{fs2}" fill="#4A4A46" font-family="{FONT}">{text}</text>')
 
-    # 尺寸线
-    out.append(_dim_h(0, W, -MARGIN * 0.55, f"{int(W)}", s))
-    out.append(_dim_h(0, W, D + MARGIN * 0.55, f"{int(W)}", s))
-    out.append(_dim_v(0, D, -MARGIN * 0.55, f"{int(D)}", s))
-    out.append(_dim_v(0, D, W + MARGIN * 0.55, f"{int(D)}", s))
+    # ── 轴线（墙体中线，编号 1/2 与 A/B）──
+    out.append(_axis_v(-t / 2, T + M * 0.35, B - M * 0.25, "1", s))
+    out.append(_axis_v(W + t / 2, T + M * 0.35, B - M * 0.25, "2", s))
+    out.append(_axis_h(-t / 2, L + M * 0.35, R - M * 0.25, "A", s))
+    out.append(_axis_h(D + t / 2, L + M * 0.35, R - M * 0.25, "B", s))
+
+    # 门窗编号（M1/C1…）：画在物件之后，避免被固定件盖住
+    for tag, op in _opening_tags(room.get("openings", [])):
+        wall = op.get("wall", "north")
+        off, width = op.get("offset", 0), op.get("width", 0)
+        if wall in ("north", "south"):
+            cx = off + width / 2
+            cy = 2.6 * s if wall == "north" else D - 1.6 * s
+        else:
+            cy = off + width / 2
+            cx = 2.6 * s if wall == "west" else W - 2.6 * s
+        out.append(f'<text x="{cx}" y="{cy}" font-size="{2.4*s}" text-anchor="middle" fill="#2F5C7A" '
+                   f'font-family="{FONT}" font-weight="600" style="paint-order:stroke" stroke="#FFFFFF" stroke-width="{s*0.9}">{tag}</text>')
+
+    # 尺寸线：外道=总尺寸，内道=门窗定位分段
+    out.append(_dim_h(0, W, -M * 1.0, f"{int(W)}", s))
+    out.append(_dim_h(0, W, D + M * 1.0, f"{int(W)}", s))
+    out.append(_dim_v(0, D, -M * 1.0, f"{int(D)}", s))
+    out.append(_dim_v(0, D, W + M * 1.0, f"{int(D)}", s))
+
+    ops = room.get("openings", [])
+    if any(o.get("wall") == "north" for o in ops):
+        out.append(_chain(_segments(W, ops, "north"), s, "h", -M * 0.58))
+    if any(o.get("wall") == "south" for o in ops):
+        out.append(_chain(_segments(W, ops, "south"), s, "h", D + M * 0.58))
+    if any(o.get("wall") == "west" for o in ops):
+        out.append(_chain(_segments(D, ops, "west"), s, "v", -M * 0.58))
+    if any(o.get("wall") == "east" for o in ops):
+        out.append(_chain(_segments(D, ops, "east"), s, "v", W + M * 0.58))
 
     # 灯光层（仅 --layer lighting 时绘制，单独出「灯光点位图」）
     if layer == "lighting":
@@ -342,8 +456,15 @@ def draw_room(room: dict, s: int, layer: str = "plan") -> str:
     area = W * D / 1_000_000
     title = f'{room["name"]}　{int(W)}×{int(D)}mm　{area:.1f}㎡　1:{s}'
     out.append(f'<text x="0" y="{D + M*0.95}" font-size="{3.4*s}" fill="#2F2F2C" font-family="{FONT}" font-weight="700">{title}</text>')
-    out.append(f'<text x="0" y="{D + M*0.75}" font-size="{2.2*s}" fill="#7A7A74" font-family="{FONT}">实线=现有柜/桌　虚线=新增家具　灰色=固定构件（柱/梁）</text>')
-    out.append("</g></svg>")
+    out.append(f'<text x="0" y="{D + M*0.75}" font-size="{2.2*s}" fill="#7A7A74" font-family="{FONT}">实线=现有柜/桌　虚线=新增家具　灰色=固定构件（柱/梁/卫生间/阳台）</text>')
+    out.append("</g>")
+
+    # ── 图框元件（纸张坐标，不参与缩放）──
+    import datetime as _d
+    out.append(_title_block(room.get("_project") or "婚房翻新_2026", room["name"], s, _d.date.today().isoformat()))
+    out.append(_scale_bar(s))
+    out.append('<text x="14" y="270" font-size="3" fill="#7A7A74" font-family="' + FONT + '">图例：轴线 ┈┈　实墙 ■　门窗洞口留白</text>')
+    out.append("</svg>")
     return "\n".join(out)
 
 
@@ -438,6 +559,14 @@ def build_table(data: dict) -> str:
         lines.append(f'门窗：' + "；".join(
             f'{o.get("type")}·{o.get("wall")}·距角{int(o.get("offset",0))}·宽{int(o.get("width",0))}' for o in room.get("openings", [])))
         lines.append("")
+        ops = room.get("openings", [])
+        if ops:
+            lines += ["**门窗表**", "", "| 编号 | 类型 | 宽×高 | 所在墙 | 定位（距角） |", "|------|------|-------|--------|--------------|"]
+            for tag, op in _opening_tags(ops):
+                typ = "门" if op.get("type") == "door" else "窗"
+                h = op.get("height", "")
+                lines.append(f'| {tag} | {typ} | {int(op.get("width",0))}×{int(h) if h != "" else "—"} | {op.get("wall","")} | {int(op.get("offset",0))} |')
+            lines.append("")
     return "\n".join(lines)
 
 
@@ -456,6 +585,7 @@ def cmd_draw(args) -> int:
 
     svgs = []
     for room in data["rooms"]:
+        room["_project"] = data.get("project", "婚房翻新")
         s = pick_scale(room["inner"]["w"], room["inner"]["d"])
         svg = draw_room(room, s, layer=args.layer)
         svgs.append((room["name"], svg))
